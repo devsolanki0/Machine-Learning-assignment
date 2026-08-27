@@ -1,0 +1,395 @@
+DECISION TREE CLASSIFICATION
+
+
+TASK 1
+
+Load the Iris dataset using scikit-learn, train a DecisionTreeClassifier, and plot the resulting decision tree using plot_tree().
+
+CODE:
+
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+import matplotlib.pyplot as plt
+
+# Load Iris dataset
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+# Create Decision Tree
+model = DecisionTreeClassifier(
+    criterion="gini",
+    random_state=42
+)
+
+# Train the model
+model.fit(X, y)
+
+# Plot the decision tree
+plt.figure(figsize=(15, 10))
+
+plot_tree(
+    model,
+    feature_names=iris.feature_names,
+    class_names=iris.target_names,
+    filled=True
+)
+
+plt.title("Decision Tree - Iris Dataset")
+plt.show()
+
+
+EXPLANATION:
+
+The Decision Tree learns rules from the Iris features to classify flowers into Setosa, Versicolor, and Virginica. The plot shows the feature and threshold used at each decision node.
+
+
+TASK 2
+
+Change the splitting criterion from 'gini' to 'entropy' and compare the accuracy scores.
+
+CODE:
+
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+# Split the Iris dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+# Decision Tree using Gini
+gini_model = DecisionTreeClassifier(
+    criterion="gini",
+    random_state=42
+)
+
+gini_model.fit(X_train, y_train)
+
+gini_pred = gini_model.predict(X_test)
+
+gini_accuracy = accuracy_score(
+    y_test,
+    gini_pred
+)
+
+
+# Decision Tree using Entropy
+entropy_model = DecisionTreeClassifier(
+    criterion="entropy",
+    random_state=42
+)
+
+entropy_model.fit(X_train, y_train)
+
+entropy_pred = entropy_model.predict(X_test)
+
+entropy_accuracy = accuracy_score(
+    y_test,
+    entropy_pred
+)
+
+
+print("Gini Accuracy:", gini_accuracy)
+print("Entropy Accuracy:", entropy_accuracy)
+
+
+EXPLANATION:
+
+Gini and Entropy are two different methods used by a decision tree to measure the impurity of a node. The model with the higher test accuracy performs better on the given train-test split. On the Iris dataset, both methods often give similar accuracy.
+
+
+TASK 3
+
+Limit the maximum depth of the decision tree to 2 and visualize the new tree structure.
+
+CODE:
+
+# Create a Decision Tree with maximum depth 2
+depth_model = DecisionTreeClassifier(
+    criterion="gini",
+    max_depth=2,
+    random_state=42
+)
+
+# Train the model
+depth_model.fit(X_train, y_train)
+
+# Plot the tree
+plt.figure(figsize=(12, 7))
+
+plot_tree(
+    depth_model,
+    feature_names=iris.feature_names,
+    class_names=iris.target_names,
+    filled=True
+)
+
+plt.title("Decision Tree with Maximum Depth = 2")
+plt.show()
+
+
+EXPLANATION:
+
+The full-depth tree can continue splitting the data until it reaches very pure leaf nodes. When max_depth is limited to 2, the tree can make only two levels of decisions, so it is much simpler and easier to understand.
+
+The depth-2 tree uses fewer rules and may have slightly lower accuracy because it cannot capture as many details in the dataset.
+
+
+TASK 4
+
+Use feature_importances_ to display the importance of each Iris feature and sort them from most to least important.
+
+CODE:
+
+# Get feature importance
+importance = depth_model.feature_importances_
+
+# Create a list of feature names and importance scores
+feature_importance = list(
+    zip(iris.feature_names, importance)
+)
+
+# Sort from most to least important
+feature_importance.sort(
+    key=lambda x: x[1],
+    reverse=True
+)
+
+print("Feature Importance:")
+
+for feature, score in feature_importance:
+    print(feature, ":", score)
+
+
+EXPLANATION:
+
+A higher importance score means that the feature contributed more to the decision-making process of the tree.
+
+For the Iris dataset, petal length and petal width are usually among the most important features because they provide strong separation between the different Iris species.
+
+
+TASK 5
+
+Pick a dataset and train a decision tree. Interpret the first three splits in your own words.
+
+For this task, we will use the Iris dataset because it is already available in scikit-learn and does not require downloading a separate CSV file.
+
+CODE:
+
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+import matplotlib.pyplot as plt
+
+# Load Iris dataset
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+# Train Decision Tree
+model = DecisionTreeClassifier(
+    max_depth=3,
+    random_state=42
+)
+
+model.fit(X, y)
+
+# Visualize tree
+plt.figure(figsize=(15, 10))
+
+plot_tree(
+    model,
+    feature_names=iris.feature_names,
+    class_names=iris.target_names,
+    filled=True
+)
+
+plt.title("Iris Decision Tree - First Three Splits")
+plt.show()
+
+
+INTERPRETATION:
+
+The exact thresholds can vary depending on the dataset and model settings, but the first splits will usually involve petal measurements.
+
+Split 1:
+The tree commonly starts with a condition involving petal length, such as:
+"petal length <= a particular value"
+
+This split helps separate Setosa flowers from the other Iris species because Setosa generally has much smaller petals.
+
+Split 2:
+For the remaining flowers, the tree may use another petal measurement, such as:
+"petal width <= a particular value"
+
+This helps distinguish Versicolor from Virginica because their petal sizes are different.
+
+Split 3:
+The tree may again use petal length or petal width with another threshold.
+
+This further separates the remaining classes and creates purer groups of flowers.
+
+
+IMPORTANT:
+
+The exact feature and threshold shown in the first three splits should always be read from the plot produced by plot_tree(). The values can change if the dataset, train-test split, max_depth, or other model settings are changed.
+
+
+COMPLETE CODE
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+
+# Load Iris dataset
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+
+# ------------------------------------------------
+# TASK 1: Gini Decision Tree
+# ------------------------------------------------
+
+gini_model = DecisionTreeClassifier(
+    criterion="gini",
+    random_state=42
+)
+
+gini_model.fit(X_train, y_train)
+
+gini_pred = gini_model.predict(X_test)
+
+print("Gini Accuracy:",
+      accuracy_score(y_test, gini_pred))
+
+
+# Plot full-depth tree
+plt.figure(figsize=(15, 10))
+
+plot_tree(
+    gini_model,
+    feature_names=iris.feature_names,
+    class_names=iris.target_names,
+    filled=True
+)
+
+plt.title("Full Decision Tree - Gini")
+plt.show()
+
+
+# ------------------------------------------------
+# TASK 2: Entropy Decision Tree
+# ------------------------------------------------
+
+entropy_model = DecisionTreeClassifier(
+    criterion="entropy",
+    random_state=42
+)
+
+entropy_model.fit(X_train, y_train)
+
+entropy_pred = entropy_model.predict(X_test)
+
+print("Entropy Accuracy:",
+      accuracy_score(y_test, entropy_pred))
+
+
+# ------------------------------------------------
+# TASK 3: Maximum Depth = 2
+# ------------------------------------------------
+
+depth_model = DecisionTreeClassifier(
+    criterion="gini",
+    max_depth=2,
+    random_state=42
+)
+
+depth_model.fit(X_train, y_train)
+
+depth_pred = depth_model.predict(X_test)
+
+print("Depth 2 Accuracy:",
+      accuracy_score(y_test, depth_pred))
+
+
+# Plot depth-2 tree
+plt.figure(figsize=(12, 7))
+
+plot_tree(
+    depth_model,
+    feature_names=iris.feature_names,
+    class_names=iris.target_names,
+    filled=True
+)
+
+plt.title("Decision Tree - Maximum Depth 2")
+plt.show()
+
+
+# ------------------------------------------------
+# TASK 4: Feature Importance
+# ------------------------------------------------
+
+importance = depth_model.feature_importances_
+
+feature_importance = list(
+    zip(iris.feature_names, importance)
+)
+
+feature_importance.sort(
+    key=lambda x: x[1],
+    reverse=True
+)
+
+print("\nFeature Importance:")
+
+for feature, score in feature_importance:
+    print(feature, ":", score)
+
+
+# ------------------------------------------------
+# TASK 5: First Three Splits
+# ------------------------------------------------
+
+print("\nFirst Three Splits:")
+
+tree = gini_model.tree_
+
+for i in range(min(3, tree.node_count)):
+
+    if tree.children_left[i] != tree.children_right[i]:
+
+        feature = iris.feature_names[
+            tree.feature[i]
+        ]
+
+        threshold = tree.threshold[i]
+
+        print(
+            "Node", i,
+            "->", feature,
+            "<=",
+            round(threshold, 2)
+        )
+
+
+FINAL CONCLUSION:
+
+A Decision Tree makes predictions by repeatedly splitting the data using feature-based conditions. Gini and Entropy are two different splitting criteria, while max_depth controls the complexity of the tree. Feature importance helps identify which features contribute most to classification. A smaller tree is easier to understand, while a full-depth tree can capture more detailed patterns but may have a higher risk of overfitting.
