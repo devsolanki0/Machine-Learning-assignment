@@ -1,0 +1,407 @@
+SUPPORT VECTOR MACHINE (SVM) CLASSIFICATION
+
+
+TASK 1
+
+Create a simple SVM classifier to separate two music genres (Pop vs Classical) based on tempo and danceability, and plot the decision boundary.
+
+CODE:
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+
+# Create a small music dataset
+# Features: tempo and danceability
+X = np.array([
+    [120, 0.80],
+    [125, 0.75],
+    [130, 0.85],
+    [135, 0.78],
+    [140, 0.82],
+    [145, 0.88],
+    [70, 0.30],
+    [75, 0.35],
+    [80, 0.25],
+    [85, 0.40],
+    [90, 0.32],
+    [95, 0.38]
+])
+
+# 0 = Classical, 1 = Pop
+y = np.array([
+    1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0
+])
+
+# Train SVM
+model = SVC(kernel="linear")
+model.fit(X, y)
+
+# Create grid for decision boundary
+x_min, x_max = X[:, 0].min() - 10, X[:, 0].max() + 10
+y_min, y_max = X[:, 1].min() - 0.1, X[:, 1].max() + 0.1
+
+xx, yy = np.meshgrid(
+    np.linspace(x_min, x_max, 300),
+    np.linspace(y_min, y_max, 300)
+)
+
+# Predict grid points
+Z = model.predict(
+    np.c_[xx.ravel(), yy.ravel()]
+)
+
+Z = Z.reshape(xx.shape)
+
+# Plot decision regions
+plt.contourf(xx, yy, Z, alpha=0.2)
+
+# Plot data points
+plt.scatter(
+    X[:, 0],
+    X[:, 1],
+    c=y,
+    edgecolors="black"
+)
+
+# Plot support vectors
+plt.scatter(
+    model.support_vectors_[:, 0],
+    model.support_vectors_[:, 1],
+    s=100,
+    facecolors="none",
+    edgecolors="black",
+    label="Support Vectors"
+)
+
+plt.xlabel("Tempo")
+plt.ylabel("Danceability")
+plt.title("SVM Decision Boundary - Music Genres")
+plt.legend()
+plt.show()
+
+
+EXPLANATION:
+
+The SVM finds a boundary that separates Pop and Classical songs. The support vectors are the data points closest to the decision boundary and are important in determining the position of the boundary.
+
+
+TASK 2
+
+Given a dataset of Flipkart product reviews labeled as positive or negative, use an SVM with a linear kernel to classify the reviews and print the accuracy score.
+
+CODE:
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+
+# Flipkart-style review dataset
+reviews = [
+    "Excellent product and very good quality",
+    "Amazing product I loved it",
+    "Very good and worth the money",
+    "Excellent quality and fast delivery",
+    "I am very happy with this product",
+    "Good product and nice quality",
+    "Very bad product",
+    "Worst product I have purchased",
+    "Poor quality and waste of money",
+    "Very disappointing product",
+    "Bad quality and terrible experience",
+    "I hate this product",
+    "Not worth the money",
+    "Completely useless product",
+    "Excellent purchase",
+    "Really good product"
+]
+
+labels = [
+    "positive",
+    "positive",
+    "positive",
+    "positive",
+    "positive",
+    "positive",
+    "negative",
+    "negative",
+    "negative",
+    "negative",
+    "negative",
+    "negative",
+    "negative",
+    "negative",
+    "positive",
+    "positive"
+]
+
+# Convert text into numerical features
+vectorizer = TfidfVectorizer()
+
+X = vectorizer.fit_transform(reviews)
+y = labels
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.25,
+    random_state=42,
+    stratify=y
+)
+
+# Create SVM with linear kernel
+model = SVC(kernel="linear")
+
+# Train model
+model.fit(X_train, y_train)
+
+# Predict
+y_pred = model.predict(X_test)
+
+# Calculate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+
+print("SVM Accuracy:", accuracy)
+
+
+EXPLANATION:
+
+TfidfVectorizer converts the review text into numerical values. A linear SVM then finds a boundary that separates positive reviews from negative reviews. Accuracy shows the percentage of correctly classified test reviews.
+
+
+TASK 3
+
+Train two SVM classifiers on an IPL player performance dataset: one using a polynomial kernel and one using an RBF kernel. Compare their accuracy scores.
+
+CODE:
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+
+# Create a small IPL-style dataset
+data = {
+    "runs": [
+        250, 300, 350, 400, 450,
+        500, 550, 600, 650, 700,
+        50, 80, 100, 120, 150,
+        170, 190, 210, 230, 240
+    ],
+
+    "wickets": [
+        2, 3, 4, 5, 6,
+        7, 8, 9, 10, 11,
+        15, 14, 13, 12, 11,
+        10, 9, 8, 7, 6
+    ],
+
+    "strike_rate": [
+        120, 125, 130, 135, 140,
+        145, 150, 155, 160, 165,
+        80, 85, 90, 95, 100,
+        105, 110, 115, 118, 119
+    ],
+
+    "performance": [
+        "Good", "Good", "Good", "Good", "Good",
+        "Good", "Good", "Good", "Good", "Good",
+        "Poor", "Poor", "Poor", "Poor", "Poor",
+        "Poor", "Poor", "Poor", "Poor", "Poor"
+    ]
+}
+
+df = pd.DataFrame(data)
+
+# Features
+X = df[["runs", "wickets", "strike_rate"]]
+
+# Target
+y = df["performance"]
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.3,
+    random_state=42,
+    stratify=y
+)
+
+# Scale features
+scaler = StandardScaler()
+
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+
+# Polynomial Kernel
+poly_model = SVC(
+    kernel="poly",
+    degree=3
+)
+
+poly_model.fit(X_train, y_train)
+
+poly_pred = poly_model.predict(X_test)
+
+poly_accuracy = accuracy_score(
+    y_test,
+    poly_pred
+)
+
+
+# RBF Kernel
+rbf_model = SVC(
+    kernel="rbf"
+)
+
+rbf_model.fit(X_train, y_train)
+
+rbf_pred = rbf_model.predict(X_test)
+
+rbf_accuracy = accuracy_score(
+    y_test,
+    rbf_pred
+)
+
+
+# Print results
+print("Polynomial Kernel Accuracy:", poly_accuracy)
+print("RBF Kernel Accuracy:", rbf_accuracy)
+
+
+EXPLANATION:
+
+The polynomial kernel can model curved relationships using polynomial functions, while the RBF kernel can model more flexible non-linear boundaries.
+
+The kernel with the higher test accuracy performed better on this dataset. RBF often performs well when the relationship between features and classes is non-linear, but the actual result depends on the dataset and parameter settings.
+
+
+TASK 4
+
+Use SVM to visualize the margin and support vectors for a two-class Zomato restaurant rating dataset, such as Good vs Bad ratings.
+
+CODE:
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+
+# Zomato-style restaurant data
+# Features:
+# x = number of reviews
+# y = restaurant rating
+
+X = np.array([
+    [50, 2.5],
+    [70, 2.7],
+    [90, 2.8],
+    [110, 3.0],
+    [130, 3.1],
+    [150, 3.2],
+    [300, 4.0],
+    [350, 4.1],
+    [400, 4.2],
+    [450, 4.3],
+    [500, 4.5],
+    [550, 4.6]
+])
+
+# 0 = Bad, 1 = Good
+y = np.array([
+    0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1
+])
+
+# Train linear SVM
+model = SVC(
+    kernel="linear",
+    C=1
+)
+
+model.fit(X, y)
+
+# Create grid
+x_min = X[:, 0].min() - 50
+x_max = X[:, 0].max() + 50
+
+y_min = X[:, 1].min() - 0.5
+y_max = X[:, 1].max() + 0.5
+
+xx, yy = np.meshgrid(
+    np.linspace(x_min, x_max, 300),
+    np.linspace(y_min, y_max, 300)
+)
+
+# Decision function
+Z = model.decision_function(
+    np.c_[xx.ravel(), yy.ravel()]
+)
+
+Z = Z.reshape(xx.shape)
+
+# Plot decision boundary and margins
+plt.contour(
+    xx,
+    yy,
+    Z,
+    levels=[-1, 0, 1],
+    linestyles=["--", "-", "--"]
+)
+
+# Plot data points
+plt.scatter(
+    X[:, 0],
+    X[:, 1],
+    c=y,
+    s=60,
+    edgecolors="black"
+)
+
+# Highlight support vectors
+plt.scatter(
+    model.support_vectors_[:, 0],
+    model.support_vectors_[:, 1],
+    s=150,
+    facecolors="none",
+    edgecolors="black",
+    linewidths=2,
+    label="Support Vectors"
+)
+
+plt.xlabel("Number of Reviews")
+plt.ylabel("Restaurant Rating")
+plt.title("SVM Margin and Support Vectors - Zomato")
+plt.legend()
+
+plt.show()
+
+
+EXPLANATION:
+
+The solid line represents the SVM decision boundary. The two dashed lines represent the margins. The circled points are the support vectors, which are the observations closest to the decision boundary and determine the position of the separating boundary.
+
+
+AI-GENERATED CODE AND CHANGES MADE:
+
+I used ChatGPT to generate the basic SVM visualization code.
+
+Changes made:
+
+1. Created a small Zomato-style dataset with two classes: Good and Bad.
+2. Used two numerical features so that the decision boundary could be visualized in two dimensions.
+3. Used a linear SVM because its decision boundary and margins are easy to visualize.
+4. Added decision_function() to display the decision boundary and two margin lines.
+5. Used support_vectors_ to highlight the support vectors.
+
+The code can be run directly in Jupyter Notebook. After running Task 4, take a screenshot of the generated plot and attach it to the assignment.
+
+
+FINAL CONCLUSION:
+
+SVM is a supervised machine learning algorithm that finds a decision boundary separating different classes. The support vectors are the points closest to the boundary, and the margin represents the distance between the decision boundary and the closest points. Different kernels such as linear, polynomial, and RBF allow SVM to model different types of relationships in the data.
