@@ -1,0 +1,240 @@
+LOGISTIC REGRESSION AND SIGMOID FUNCTION
+
+
+TASK 1
+
+Create a Python function sigmoid(x) that takes a numeric input and returns the sigmoid value using the formula:
+
+1 / (1 + exp(-x))
+
+Test the function with x = -2, 0, and 3.
+
+CODE:
+
+import numpy as np
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+print("Sigmoid(-2):", sigmoid(-2))
+print("Sigmoid(0):", sigmoid(0))
+print("Sigmoid(3):", sigmoid(3))
+
+
+OUTPUT:
+
+Sigmoid(-2): 0.1192
+Sigmoid(0): 0.5
+Sigmoid(3): 0.9526
+
+
+EXPLANATION:
+
+The sigmoid function converts any input into a value between 0 and 1. A value close to 1 represents a high probability, while a value close to 0 represents a low probability.
+
+
+TASK 2
+
+Given a dataset of 10 Instagram posts with features 'likes' and 'has_caption', and a label 'viral', fit a Logistic Regression model to predict whether a post is viral.
+
+CODE:
+
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+
+# Create dataset
+data = {
+    "likes": [100, 250, 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000],
+    "has_caption": [0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+    "viral": [0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+}
+
+df = pd.DataFrame(data)
+
+# Features
+X = df[["likes", "has_caption"]]
+
+# Target
+y = df["viral"]
+
+# Create Logistic Regression model
+model = LogisticRegression()
+
+# Train model
+model.fit(X, y)
+
+# Print coefficients
+print("Model Coefficients:")
+
+for feature, coefficient in zip(X.columns, model.coef_[0]):
+    print(feature, ":", coefficient)
+
+print("\nIntercept:", model.intercept_[0])
+
+
+EXPLANATION:
+
+The coefficient of likes shows how the number of likes affects the probability of a post becoming viral. The coefficient of has_caption shows how having a caption affects the predicted probability of becoming viral.
+
+
+TASK 3
+
+Plot the sigmoid function for x values from -10 to 10 and indicate the threshold at 0.5.
+
+CODE:
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate x values
+x = np.linspace(-10, 10, 200)
+
+# Calculate sigmoid values
+y = 1 / (1 + np.exp(-x))
+
+# Plot sigmoid function
+plt.plot(x, y, label="Sigmoid Function")
+
+# Draw threshold line at 0.5
+plt.axhline(y=0.5, linestyle="--", label="Threshold = 0.5")
+
+# Add labels
+plt.xlabel("x")
+plt.ylabel("Sigmoid(x)")
+plt.title("Sigmoid Function")
+plt.legend()
+plt.grid()
+
+plt.show()
+
+
+EXPLANATION:
+
+The sigmoid curve converts values into probabilities between 0 and 1. The 0.5 threshold is commonly used for classification: probabilities of 0.5 or higher are classified as 1, while probabilities below 0.5 are classified as 0.
+
+
+TASK 4
+
+Create a function that classifies a probability as 'Viral' or 'Not Viral' based on a threshold. The default threshold is 0.5.
+
+CODE:
+
+def classify_post(probability, threshold=0.5):
+
+    if probability >= threshold:
+        return "Viral"
+    else:
+        return "Not Viral"
+
+
+# Test with threshold = 0.5
+print("Threshold = 0.5")
+
+print("0.2:", classify_post(0.2))
+print("0.6:", classify_post(0.6))
+print("0.8:", classify_post(0.8))
+
+
+# Test with threshold = 0.7
+print("\nThreshold = 0.7")
+
+print("0.2:", classify_post(0.2, 0.7))
+print("0.6:", classify_post(0.6, 0.7))
+print("0.8:", classify_post(0.8, 0.7))
+
+
+EXPECTED OUTPUT:
+
+Threshold = 0.5
+
+0.2: Not Viral
+0.6: Viral
+0.8: Viral
+
+Threshold = 0.7
+
+0.2: Not Viral
+0.6: Not Viral
+0.8: Viral
+
+
+EXPLANATION:
+
+With a threshold of 0.5, a probability of 0.5 or higher is classified as Viral. When the threshold is increased to 0.7, the model becomes more strict, so only probabilities of 0.7 or higher are classified as Viral.
+
+
+COMPLETE CODE
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LogisticRegression
+
+
+# TASK 1: Sigmoid Function
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+print("Sigmoid(-2):", sigmoid(-2))
+print("Sigmoid(0):", sigmoid(0))
+print("Sigmoid(3):", sigmoid(3))
+
+
+# TASK 2: Logistic Regression
+
+data = {
+    "likes": [100, 250, 500, 1000, 1500, 2000, 3000, 4000, 5000, 6000],
+    "has_caption": [0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+    "viral": [0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+}
+
+df = pd.DataFrame(data)
+
+X = df[["likes", "has_caption"]]
+y = df["viral"]
+
+model = LogisticRegression()
+model.fit(X, y)
+
+print("\nLogistic Regression Coefficients:")
+
+for feature, coefficient in zip(X.columns, model.coef_[0]):
+    print(feature, ":", coefficient)
+
+
+# TASK 3: Plot Sigmoid Function
+
+x = np.linspace(-10, 10, 200)
+y_sigmoid = sigmoid(x)
+
+plt.plot(x, y_sigmoid, label="Sigmoid Function")
+plt.axhline(y=0.5, linestyle="--", label="Threshold = 0.5")
+
+plt.xlabel("x")
+plt.ylabel("Probability")
+plt.title("Sigmoid Function")
+plt.legend()
+plt.grid()
+plt.show()
+
+
+# TASK 4: Classification Function
+
+def classify_post(probability, threshold=0.5):
+
+    if probability >= threshold:
+        return "Viral"
+    else:
+        return "Not Viral"
+
+
+print("\nClassification Results:")
+
+print("0.2 with threshold 0.5:", classify_post(0.2))
+print("0.6 with threshold 0.5:", classify_post(0.6))
+print("0.8 with threshold 0.5:", classify_post(0.8))
+
+print("0.2 with threshold 0.7:", classify_post(0.2, 0.7))
+print("0.6 with threshold 0.7:", classify_post(0.6, 0.7))
+print("0.8 with threshold 0.7:", classify_post(0.8, 0.7))
