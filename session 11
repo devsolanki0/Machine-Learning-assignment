@@ -1,0 +1,403 @@
+KNN AND NAIVE BAYES CLASSIFICATION
+
+
+TASK 1
+
+Implement a K-Nearest Neighbors (KNN) classifier to predict whether a Flipkart product review is positive or negative using review texts and labels.
+
+CODE:
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.neighbors import KNeighborsClassifier
+
+# Small Flipkart review dataset
+reviews = [
+    "Amazing product and excellent quality",
+    "Very good product",
+    "I love this product",
+    "Excellent and worth the money",
+    "Very bad product",
+    "Worst product ever",
+    "Poor quality and disappointing",
+    "Not good at all",
+    "Amazing quality",
+    "Terrible product"
+]
+
+labels = [
+    "positive",
+    "positive",
+    "positive",
+    "positive",
+    "negative",
+    "negative",
+    "negative",
+    "negative",
+    "positive",
+    "negative"
+]
+
+# Convert text into numerical features
+vectorizer = CountVectorizer()
+
+X = vectorizer.fit_transform(reviews)
+
+# Create KNN classifier
+knn = KNeighborsClassifier(n_neighbors=3)
+
+# Train the model
+knn.fit(X, labels)
+
+# Test a new review
+new_review = ["Excellent product and good quality"]
+
+new_X = vectorizer.transform(new_review)
+
+prediction = knn.predict(new_X)
+
+print("Review:", new_review[0])
+print("Prediction:", prediction[0])
+
+
+EXPLANATION:
+
+CountVectorizer converts review text into numerical word-count features. KNN then compares the new review with nearby training reviews and predicts the class based on the majority of its nearest neighbors.
+
+
+TASK 2
+
+Compare KNN accuracy using Euclidean distance and Manhattan distance on Spotify song features such as tempo, danceability, and energy.
+
+CODE:
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+
+# Create a small Spotify-style dataset
+data = {
+    "tempo": [140, 150, 130, 145, 155, 70, 80, 75, 85, 90],
+    "danceability": [0.85, 0.90, 0.80, 0.88, 0.92, 0.30, 0.40, 0.35, 0.45, 0.50],
+    "energy": [0.90, 0.95, 0.85, 0.92, 0.98, 0.25, 0.30, 0.20, 0.35, 0.40],
+    "playlist": [
+        "workout", "workout", "workout", "workout", "workout",
+        "chill", "chill", "chill", "chill", "chill"
+    ]
+}
+
+df = pd.DataFrame(data)
+
+# Features and target
+X = df[["tempo", "danceability", "energy"]]
+y = df["playlist"]
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y
+)
+
+# Scale features because KNN is distance-based
+scaler = StandardScaler()
+
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+
+# KNN with Euclidean distance
+knn_euclidean = KNeighborsClassifier(
+    n_neighbors=3,
+    metric="euclidean"
+)
+
+knn_euclidean.fit(X_train, y_train)
+
+pred_euclidean = knn_euclidean.predict(X_test)
+
+accuracy_euclidean = accuracy_score(
+    y_test, pred_euclidean
+)
+
+
+# KNN with Manhattan distance
+knn_manhattan = KNeighborsClassifier(
+    n_neighbors=3,
+    metric="manhattan"
+)
+
+knn_manhattan.fit(X_train, y_train)
+
+pred_manhattan = knn_manhattan.predict(X_test)
+
+accuracy_manhattan = accuracy_score(
+    y_test, pred_manhattan
+)
+
+
+print("Euclidean Accuracy:", accuracy_euclidean)
+print("Manhattan Accuracy:", accuracy_manhattan)
+
+
+EXPLANATION:
+
+Euclidean distance measures the straight-line distance between points, while Manhattan distance measures the distance by adding the absolute differences between features. The model with the higher test accuracy performs better on this dataset.
+
+
+TASK 3
+
+Use Gaussian Naive Bayes to classify whether an IRCTC train booking will be confirmed or waitlisted based on booking time, train popularity, and travel day.
+
+CODE:
+
+import pandas as pd
+from sklearn.naive_bayes import GaussianNB
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+# Small mock IRCTC dataset
+data = {
+    "booking_time": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "train_popularity": [2, 3, 4, 5, 6, 7, 8, 9, 9, 10],
+    "travel_day": [1, 1, 2, 2, 3, 3, 4, 4, 5, 5],
+    "status": [
+        "confirmed",
+        "confirmed",
+        "confirmed",
+        "confirmed",
+        "confirmed",
+        "waitlisted",
+        "waitlisted",
+        "waitlisted",
+        "waitlisted",
+        "waitlisted"
+    ]
+}
+
+df = pd.DataFrame(data)
+
+# Features
+X = df[[
+    "booking_time",
+    "train_popularity",
+    "travel_day"
+]]
+
+# Target
+y = df["status"]
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# Create Gaussian Naive Bayes model
+model = GaussianNB()
+
+# Train model
+model.fit(X_train, y_train)
+
+# Predictions
+predictions = model.predict(X_test)
+
+# Accuracy
+accuracy = accuracy_score(y_test, predictions)
+
+print("Predictions:", predictions)
+print("Actual:", list(y_test))
+print("Accuracy:", accuracy)
+
+# Test a new booking
+new_booking = [[3, 4, 2]]
+
+prediction = model.predict(new_booking)
+
+print("New Booking Prediction:", prediction[0])
+
+
+EXPLANATION:
+
+Gaussian Naive Bayes assumes that the numerical features follow a Gaussian (normal) distribution within each class. It uses the booking information to calculate whether a new booking is more likely to be confirmed or waitlisted.
+
+
+TASK 4
+
+Build a Multinomial Naive Bayes classifier to categorize WhatsApp messages as personal, group, or spam. Show the confusion matrix.
+
+CODE:
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, accuracy_score
+
+# WhatsApp messages
+messages = [
+    "Hi mom how are you",
+    "Happy birthday brother",
+    "Can you call me tonight",
+    "I will reach home soon",
+    "How was your day",
+    "Friends meeting at 7 pm",
+    "Everyone come to the group meeting",
+    "Team meeting tomorrow at 10",
+    "Please share your assignment in group",
+    "Our cricket match is tomorrow",
+    "Congratulations you won a free prize",
+    "Click this link to claim your reward",
+    "You have won a lottery prize",
+    "Congratulations claim your free gift",
+    "Click now to win money"
+]
+
+labels = [
+    "personal",
+    "personal",
+    "personal",
+    "personal",
+    "personal",
+    "group",
+    "group",
+    "group",
+    "group",
+    "group",
+    "spam",
+    "spam",
+    "spam",
+    "spam",
+    "spam"
+]
+
+# Convert messages into numerical features
+vectorizer = CountVectorizer()
+
+X = vectorizer.fit_transform(messages)
+
+# Target
+y = labels
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y
+)
+
+# Create Multinomial Naive Bayes model
+model = MultinomialNB()
+
+# Train
+model.fit(X_train, y_train)
+
+# Predict
+predictions = model.predict(X_test)
+
+# Accuracy
+accuracy = accuracy_score(y_test, predictions)
+
+print("Accuracy:", accuracy)
+
+# Confusion matrix
+cm = confusion_matrix(
+    y_test,
+    predictions,
+    labels=["personal", "group", "spam"]
+)
+
+print("\nConfusion Matrix:")
+print(cm)
+
+print("\nClass Order:")
+print(["personal", "group", "spam"])
+
+
+EXPLANATION:
+
+The confusion matrix shows the number of correct and incorrect classifications for personal, group, and spam messages. The diagonal values represent correctly classified messages, while values outside the diagonal represent classification errors.
+
+
+TASK 5
+
+Use a KNN-based image classifier to distinguish between cricket bats and footballs using random pixel arrays.
+
+CODE:
+
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+# Create random image data
+# 20 images, each having 8 x 8 pixels
+np.random.seed(42)
+
+X = np.random.randint(
+    0, 256, size=(20, 8, 8)
+)
+
+# Labels
+y = np.array([
+    "bat", "bat", "bat", "bat", "bat",
+    "bat", "bat", "bat", "bat", "bat",
+    "football", "football", "football", "football", "football",
+    "football", "football", "football", "football", "football"
+])
+
+# Convert each image into a single feature vector
+X = X.reshape(20, -1)
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y
+)
+
+# Create KNN classifier
+knn = KNeighborsClassifier(n_neighbors=3)
+
+# Train model
+knn.fit(X_train, y_train)
+
+# Predict
+predictions = knn.predict(X_test)
+
+# Accuracy
+accuracy = accuracy_score(y_test, predictions)
+
+print("Predictions:", predictions)
+print("Actual:", y_test)
+print("Accuracy:", accuracy)
+
+
+# Test a new image
+new_image = np.random.randint(
+    0, 256, size=(1, 64)
+)
+
+prediction = knn.predict(new_image)
+
+print("New Image Prediction:", prediction[0])
+
+
+EXPLANATION:
+
+The images are converted from 8 × 8 pixel arrays into 64-value feature vectors. KNN compares the pixel patterns of a new image with the training images and predicts whether it is a cricket bat or football.
+
+NOTE:
+
+Because the images in this example are random pixel arrays, the classifier cannot actually learn meaningful visual differences between bats and footballs. A real image dataset would be required for useful image classification.
+
+
+AI-GENERATED CODE AND CHANGES MADE:
+
+I used ChatGPT to generate the basic KNN image-classification code.
+
+Changes made:
+1. Used random 8 × 8 pixel arrays so that no external image dataset was required.
+2. Reshaped the images into one-dimensional feature vectors because KNN expects a 2D feature matrix.
+3. Used train_test_split with stratification to keep both classes represented in the training and testing sets.
+4. Used n_neighbors=3 for the KNN classifier.
+
+The final code runs using only NumPy and scikit-learn.
+
+
+FINAL CONCLUSION:
+
+KNN classifies data by looking at the nearest training examples, while Naive Bayes uses probability to classify data. CountVectorizer can convert text into numerical features for text classification. KNN can also be used for image classification after converting images into numerical feature vectors.
