@@ -1,0 +1,785 @@
+PHARMA: DRUG SHELF-LIFE PREDICTION
+SUPERVISED MACHINE LEARNING
+
+TASK 1: LOAD AND UNDERSTAND THE DATASET
+
+Download the ZIP file from the given GitHub link and keep it in the same folder as the Jupyter Notebook.
+
+Dataset:
+[https://github.com/bhaumik2025/DS_Data/blob/main/Datasets/Supervised%20ML/Pharmaceutical%20Supply%20Chain%20Optimization.zip](https://github.com/bhaumik2025/DS_Data/blob/main/Datasets/Supervised%20ML/Pharmaceutical%20Supply%20Chain%20Optimization.zip)
+
+CODE:
+
+```python
+import pandas as pd
+import numpy as np
+import zipfile
+import os
+
+# ZIP file name
+zip_file = "Pharmaceutical Supply Chain Optimization.zip"
+
+# Extract ZIP file
+with zipfile.ZipFile(zip_file, "r") as zip_ref:
+    zip_ref.extractall("pharma_data")
+
+# Find CSV files
+csv_files = []
+
+for root, dirs, files in os.walk("pharma_data"):
+    for file in files:
+        if file.endswith(".csv"):
+            csv_files.append(os.path.join(root, file))
+
+print("CSV files found:")
+print(csv_files)
+
+# Load the first CSV file
+df = pd.read_csv(csv_files[0])
+
+print("\nFirst 5 rows:")
+print(df.head())
+
+print("\nDataset Shape:")
+print(df.shape)
+
+print("\nColumn Names:")
+print(df.columns.tolist())
+
+print("\nData Types:")
+print(df.dtypes)
+
+print("\nDataset Information:")
+df.info()
+
+print("\nStatistical Summary:")
+print(df.describe(include="all"))
+```
+
+EXPLANATION:
+
+The head() function displays the first five rows. The info() function shows the columns, data types, and non-null values. The describe() function gives statistical information about the dataset.
+
+To find the shelf-life target column:
+
+```python
+possible_targets = [
+    col for col in df.columns
+    if "shelf" in col.lower()
+    or "life" in col.lower()
+    or "expiry" in col.lower()
+]
+
+print("Possible target columns:")
+print(possible_targets)
+```
+
+After checking the output, set the target column:
+
+```python
+target_column = possible_targets[0]
+
+print("Target Variable:", target_column)
+```
+
+TASK 2: HANDLE MISSING VALUES AND OUTLIERS
+
+First check the missing values:
+
+```python
+print("Missing Values:")
+print(df.isnull().sum())
+```
+
+Separate numerical and categorical columns:
+
+```python
+numeric_columns = df.select_dtypes(
+    include=np.number
+).columns
+
+categorical_columns = df.select_dtypes(
+    exclude=np.number
+).columns
+
+print("Numeric Columns:")
+print(numeric_columns.tolist())
+
+print("\nCategorical Columns:")
+print(categorical_columns.tolist())
+```
+
+Fill missing numerical values with the median:
+
+```python
+for col in numeric_columns:
+    df[col] = df[col].fillna(
+        df[col].median()
+    )
+```
+
+Fill missing categorical values with the mode:
+
+```python
+for col in categorical_columns:
+    df[col] = df[col].fillna(
+        df[col].mode()[0]
+    )
+```
+
+Check missing values again:
+
+```python
+print("Missing values after handling:")
+print(df.isnull().sum())
+```
+
+Detect outliers using the IQR method:
+
+```python
+for col in numeric_columns:
+
+    Q1 = df[col].quantile(0.25)
+    Q3 = df[col].quantile(0.75)
+
+    IQR = Q3 - Q1
+
+    lower = Q1 - 1.5 * IQR
+    upper = Q3 + 1.5 * IQR
+
+    outliers = df[
+        (df[col] < lower) |
+        (df[col] > upper)
+    ]
+
+    print(
+        col,
+        "Outliers:",
+        len(outliers)
+    )
+```
+
+Remove numerical outliers:
+
+```python
+for col in numeric_columns:
+
+    Q1 = df[col].quantile(0.25)
+    Q3 = df[col].quantile(0.75)
+
+    IQR = Q3 - Q1
+
+    lower = Q1 - 1.5 * IQR
+    upper = Q3 + 1.5 * IQR
+
+    df = df[
+        (df[col] >= lower) &
+        (df[col] <= upper)
+    ]
+
+print("Shape after removing outliers:")
+print(df.shape)
+```
+
+EXPLANATION:
+
+Missing numerical values are replaced with the median, while categorical missing values are replaced with the most frequent value. The IQR method is used to detect and remove extreme numerical outliers.
+
+TASK 3: EXPLORATORY DATA ANALYSIS
+
+Import visualization libraries:
+
+```python
+import matplotlib.pyplot as plt
+import seaborn as sns
+```
+
+Plot numerical feature distributions:
+
+```python
+df[numeric_columns].hist(
+    figsize=(15, 10),
+    bins=30
+)
+
+plt.suptitle(
+    "Distribution of Numerical Features"
+)
+
+plt.show()
+```
+
+Create a correlation heatmap:
+
+```python
+plt.figure(figsize=(12, 8))
+
+correlation = df[numeric_columns].corr()
+
+sns.heatmap(
+    correlation,
+    annot=True,
+    cmap="coolwarm",
+    fmt=".2f"
+)
+
+plt.title("Correlation Matrix")
+
+plt.show()
+```
+
+Plot target distribution:
+
+```python
+plt.figure(figsize=(8, 5))
+
+plt.hist(
+    df[target_column],
+    bins=30
+)
+
+plt.xlabel("Drug Shelf Life")
+plt.ylabel("Frequency")
+
+plt.title("Distribution of Drug Shelf Life")
+
+plt.show()
+```
+
+EXPLANATION:
+
+EDA helps us understand the distribution of the data and relationships between variables. The histogram shows the distribution of numerical features, while the correlation heatmap shows relationships between numerical variables.
+
+TASK 4: FEATURE ENGINEERING
+
+Create a dosage-to-volume ratio if the required columns are available:
+
+```python
+if "Dosage" in df.columns and "Volume" in df.columns:
+
+    df["Dosage_to_Volume"] = (
+        df["Dosage"] /
+        (df["Volume"] + 1)
+    )
+
+    print(
+        df[
+            [
+                "Dosage",
+                "Volume",
+                "Dosage_to_Volume"
+            ]
+        ].head()
+    )
+```
+
+Create temperature bands if a temperature column exists:
+
+```python
+if "Temperature" in df.columns:
+
+    df["Temperature_Band"] = pd.cut(
+        df["Temperature"],
+        bins=[
+            -np.inf,
+            2,
+            8,
+            25,
+            np.inf
+        ],
+        labels=[
+            "Cold",
+            "Cool",
+            "Normal",
+            "Hot"
+        ]
+    )
+
+    print(
+        df[
+            [
+                "Temperature",
+                "Temperature_Band"
+            ]
+        ].head()
+    )
+```
+
+EXPLANATION:
+
+Feature engineering creates new useful features from existing data. Dosage-to-volume ratio can represent drug concentration, while temperature bands can describe different storage conditions.
+
+TASK 5: ENCODE CATEGORICAL VARIABLES
+
+Separate features and target:
+
+```python
+X = df.drop(
+    target_column,
+    axis=1
+)
+
+y = df[target_column]
+```
+
+Find numerical and categorical features:
+
+```python
+numeric_features = X.select_dtypes(
+    include=np.number
+).columns.tolist()
+
+categorical_features = X.select_dtypes(
+    exclude=np.number
+).columns.tolist()
+
+print("Numerical Features:")
+print(numeric_features)
+
+print("\nCategorical Features:")
+print(categorical_features)
+```
+
+Create preprocessing pipeline:
+
+```python
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            StandardScaler(),
+            numeric_features
+        ),
+        (
+            "categorical",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            ),
+            categorical_features
+        )
+    ]
+)
+```
+
+EXPLANATION:
+
+OneHotEncoder converts categorical variables into numerical columns. StandardScaler scales numerical features so that they have a similar range.
+
+TASK 6: BUILD A LINEAR REGRESSION MODEL
+
+Import required libraries:
+
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+```
+
+Split the dataset:
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+```
+
+Create Linear Regression model:
+
+```python
+linear_model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "model",
+            LinearRegression()
+        )
+    ]
+)
+```
+
+Train the model:
+
+```python
+linear_model.fit(
+    X_train,
+    y_train
+)
+```
+
+Make predictions:
+
+```python
+linear_predictions = linear_model.predict(
+    X_test
+)
+```
+
+Calculate RMSE:
+
+```python
+linear_rmse = np.sqrt(
+    mean_squared_error(
+        y_test,
+        linear_predictions
+    )
+)
+
+print(
+    "Linear Regression RMSE:",
+    linear_rmse
+)
+```
+
+EXPLANATION:
+
+Linear Regression assumes that there is a linear relationship between the input features and drug shelf life. RMSE measures the difference between actual and predicted shelf-life values.
+
+TASK 7: RANDOM FOREST REGRESSOR
+
+Import Random Forest:
+
+```python
+from sklearn.ensemble import RandomForestRegressor
+```
+
+Create the model:
+
+```python
+rf_model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "model",
+            RandomForestRegressor(
+                n_estimators=100,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+Train the model:
+
+```python
+rf_model.fit(
+    X_train,
+    y_train
+)
+```
+
+Make predictions:
+
+```python
+rf_predictions = rf_model.predict(
+    X_test
+)
+```
+
+Calculate RMSE:
+
+```python
+rf_rmse = np.sqrt(
+    mean_squared_error(
+        y_test,
+        rf_predictions
+    )
+)
+
+print(
+    "Random Forest RMSE:",
+    rf_rmse
+)
+```
+
+EXPLANATION:
+
+Random Forest combines many decision trees and averages their predictions. It can capture complex and non-linear relationships in the data.
+
+TASK 8: GRADIENT BOOSTING MODEL
+
+Import Gradient Boosting:
+
+```python
+from sklearn.ensemble import GradientBoostingRegressor
+```
+
+Create the model:
+
+```python
+gb_model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "model",
+            GradientBoostingRegressor(
+                n_estimators=100,
+                learning_rate=0.05,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+Train the model:
+
+```python
+gb_model.fit(
+    X_train,
+    y_train
+)
+```
+
+Make predictions:
+
+```python
+gb_predictions = gb_model.predict(
+    X_test
+)
+```
+
+Calculate RMSE:
+
+```python
+gb_rmse = np.sqrt(
+    mean_squared_error(
+        y_test,
+        gb_predictions
+    )
+)
+
+print(
+    "Gradient Boosting RMSE:",
+    gb_rmse
+)
+```
+
+Compare all models:
+
+```python
+print("\nMODEL COMPARISON")
+
+print(
+    "Linear Regression RMSE:",
+    linear_rmse
+)
+
+print(
+    "Random Forest RMSE:",
+    rf_rmse
+)
+
+print(
+    "Gradient Boosting RMSE:",
+    gb_rmse
+)
+```
+
+Find the best model:
+
+```python
+results = {
+    "Linear Regression": linear_rmse,
+    "Random Forest": rf_rmse,
+    "Gradient Boosting": gb_rmse
+}
+
+best_model = min(
+    results,
+    key=results.get
+)
+
+print(
+    "\nBest Model:",
+    best_model
+)
+```
+
+EXPLANATION:
+
+The model with the lowest RMSE is considered the best because it produces the smallest prediction errors.
+
+TASK 9: HYPERPARAMETER TUNING USING GRIDSEARCHCV
+
+Import GridSearchCV:
+
+```python
+from sklearn.model_selection import GridSearchCV
+```
+
+Create Random Forest pipeline:
+
+```python
+rf_pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "model",
+            RandomForestRegressor(
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+Create parameter grid:
+
+```python
+param_grid = {
+    "model__n_estimators": [
+        50,
+        100,
+        200
+    ],
+
+    "model__max_depth": [
+        None,
+        5,
+        10,
+        20
+    ],
+
+    "model__min_samples_split": [
+        2,
+        5,
+        10
+    ]
+}
+```
+
+Run GridSearchCV:
+
+```python
+grid_search = GridSearchCV(
+    rf_pipeline,
+    param_grid,
+    cv=5,
+    scoring="neg_root_mean_squared_error",
+    n_jobs=-1
+)
+
+grid_search.fit(
+    X_train,
+    y_train
+)
+```
+
+Display best parameters:
+
+```python
+print("Best Parameters:")
+
+print(
+    grid_search.best_params_
+)
+```
+
+Display best cross-validation RMSE:
+
+```python
+print(
+    "Best CV RMSE:",
+    -grid_search.best_score_
+)
+```
+
+EXPLANATION:
+
+GridSearchCV tests different combinations of Random Forest parameters and selects the combination that produces the best cross-validation performance.
+
+TASK 10: FINAL MODEL EVALUATION
+
+Get the best model:
+
+```python
+final_model = grid_search.best_estimator_
+```
+
+Predict the test data:
+
+```python
+final_predictions = final_model.predict(
+    X_test
+)
+```
+
+Calculate final RMSE:
+
+```python
+final_rmse = np.sqrt(
+    mean_squared_error(
+        y_test,
+        final_predictions
+    )
+)
+
+print(
+    "Final Test RMSE:",
+    final_rmse
+)
+```
+
+Perform 5-fold cross-validation:
+
+```python
+from sklearn.model_selection import cross_val_score
+
+cv_scores = cross_val_score(
+    final_model,
+    X_train,
+    y_train,
+    cv=5,
+    scoring="neg_root_mean_squared_error"
+)
+
+cv_rmse = -cv_scores
+
+print("\nCross-Validation RMSE Scores:")
+print(cv_rmse)
+
+print(
+    "\nMean CV RMSE:",
+    cv_rmse.mean()
+)
+
+print(
+    "CV RMSE Standard Deviation:",
+    cv_rmse.std()
+)
+```
+
+FINAL CONCLUSION:
+
+The pharmaceutical dataset was first loaded and analyzed using pandas. Missing values were handled using median and mode imputation, while outliers were detected using the IQR method.
+
+EDA was performed using histograms and a correlation heatmap. Feature engineering was used to create additional useful features such as dosage-to-volume ratio and temperature bands.
+
+Categorical variables were converted into numerical values using OneHotEncoder, and numerical features were scaled using StandardScaler.
+
+Three regression models were trained: Linear Regression, Random Forest Regressor, and Gradient Boosting Regressor. Their performance was compared using RMSE.
+
+Random Forest was then tuned using GridSearchCV to find the best values for n_estimators, max_depth, and min_samples_split.
+
+Finally, the tuned model was evaluated on the test set using RMSE and 5-fold cross-validation. A lower RMSE indicates better prediction performance, while a lower cross-validation standard deviation indicates more consistent model performance.
