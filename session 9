@@ -1,0 +1,345 @@
+LASSO, RIDGE AND ELASTIC NET REGRESSION
+
+
+TASK 1
+
+Download a publicly available dataset of your choice, such as a Spotify song features dataset, and split it into features (X) and target (y) for a regression problem.
+
+Here, we will predict the popularity of a song using features such as danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence and tempo.
+
+CODE:
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+# Load Spotify dataset
+df = pd.read_csv("spotify_songs.csv")
+
+# Select features
+features = [
+    "danceability",
+    "energy",
+    "loudness",
+    "speechiness",
+    "acousticness",
+    "instrumentalness",
+    "liveness",
+    "valence",
+    "tempo"
+]
+
+X = df[features]
+y = df["popularity"]
+
+# Split into training and testing data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+print("Features:")
+print(X.head())
+
+print("\nTarget:")
+print(y.head())
+
+print("\nTraining rows:", len(X_train))
+print("Testing rows:", len(X_test))
+
+
+TASK 2
+
+Fit a Lasso regression model using scikit-learn's Lasso class and print the coefficients for each feature.
+
+CODE:
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Lasso
+
+# Scale the features
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Create Lasso model
+lasso = Lasso(alpha=0.1)
+
+# Train the model
+lasso.fit(X_train_scaled, y_train)
+
+# Print coefficients
+print("LASSO COEFFICIENTS:")
+
+for feature, coefficient in zip(features, lasso.coef_):
+    print(feature, ":", coefficient)
+
+
+EXPLANATION:
+
+Lasso uses L1 regularization. It can reduce some coefficients exactly to zero, which makes it useful for automatic feature selection.
+
+
+TASK 3
+
+Fit a Ridge regression model using L2 regularization and compare its coefficients with Lasso.
+
+CODE:
+
+from sklearn.linear_model import Ridge
+
+# Create Ridge model
+ridge = Ridge(alpha=0.1)
+
+# Train Ridge model
+ridge.fit(X_train_scaled, y_train)
+
+# Print coefficients
+print("RIDGE COEFFICIENTS:")
+
+for feature, coefficient in zip(features, ridge.coef_):
+    print(feature, ":", coefficient)
+
+
+# Compare Lasso and Ridge
+comparison = pd.DataFrame({
+    "Feature": features,
+    "Lasso": lasso.coef_,
+    "Ridge": ridge.coef_
+})
+
+print("\nLASSO vs RIDGE:")
+print(comparison)
+
+
+EXPLANATION:
+
+Lasso can force unimportant feature coefficients to exactly zero, effectively removing those features. Ridge usually makes coefficients smaller but generally does not make them exactly zero.
+
+Therefore, if a feature has a Lasso coefficient of 0 while its Ridge coefficient is not 0, Lasso has effectively selected that feature for removal.
+
+
+TASK 4
+
+Fit an ElasticNet regression model and observe how its coefficients differ from Lasso and Ridge.
+
+CODE:
+
+from sklearn.linear_model import ElasticNet
+
+# Create ElasticNet model
+elastic = ElasticNet(alpha=0.1, l1_ratio=0.5)
+
+# Train the model
+elastic.fit(X_train_scaled, y_train)
+
+# Print coefficients
+print("ELASTIC NET COEFFICIENTS:")
+
+for feature, coefficient in zip(features, elastic.coef_):
+    print(feature, ":", coefficient)
+
+
+# Compare all three models
+comparison = pd.DataFrame({
+    "Feature": features,
+    "Lasso": lasso.coef_,
+    "Ridge": ridge.coef_,
+    "ElasticNet": elastic.coef_
+})
+
+print("\nLASSO vs RIDGE vs ELASTIC NET:")
+print(comparison)
+
+
+EXPLANATION:
+
+ElasticNet combines L1 and L2 regularization. The l1_ratio controls the balance between Lasso and Ridge.
+
+l1_ratio = 1.0:
+Behaves like Lasso.
+
+l1_ratio = 0.0:
+Behaves like Ridge.
+
+l1_ratio = 0.5:
+Uses a balanced combination of L1 and L2 regularization.
+
+For example:
+
+elastic = ElasticNet(alpha=0.1, l1_ratio=0.2)
+
+uses more Ridge-like behavior.
+
+elastic = ElasticNet(alpha=0.1, l1_ratio=0.8)
+
+uses more Lasso-like behavior.
+
+
+TASK 5
+
+Use Lasso regression as a feature selector for a Zomato-style restaurant rating predictor. List the features that are kept and dropped based on their coefficients.
+
+CODE:
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Lasso
+
+# Load Zomato dataset
+df = pd.read_csv("zomato.csv")
+
+# Select numerical features
+features = [
+    "votes",
+    "average_cost_for_two",
+    "price_range",
+    "online_order",
+    "table_booking"
+]
+
+# Remove rows with missing values
+df = df.dropna(subset=features + ["rating"])
+
+# Features and target
+X = df[features]
+y = df["rating"]
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Scale features
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+
+# Create Lasso model
+lasso = Lasso(alpha=0.1)
+
+# Train model
+lasso.fit(X_train_scaled, y_train)
+
+# Create feature selection table
+feature_selection = pd.DataFrame({
+    "Feature": features,
+    "Coefficient": lasso.coef_
+})
+
+# Features with non-zero coefficients
+kept_features = feature_selection[
+    feature_selection["Coefficient"] != 0
+]["Feature"]
+
+# Features with zero coefficients
+dropped_features = feature_selection[
+    feature_selection["Coefficient"] == 0
+]["Feature"]
+
+
+print("Feature Coefficients:")
+print(feature_selection)
+
+print("\nKEPT FEATURES:")
+print(list(kept_features))
+
+print("\nDROPPED FEATURES:")
+print(list(dropped_features))
+
+
+EXPLANATION:
+
+Features with non-zero Lasso coefficients are KEPT because they contribute to the prediction.
+
+Features with coefficients equal to zero are DROPPED because Lasso considers them unnecessary after applying L1 regularization.
+
+The exact kept and dropped features depend on the dataset and the chosen alpha value.
+
+
+COMPLETE CODE FOR TASKS 1–4
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Lasso, Ridge, ElasticNet
+
+# Load Spotify dataset
+df = pd.read_csv("spotify_songs.csv")
+
+# Features
+features = [
+    "danceability",
+    "energy",
+    "loudness",
+    "speechiness",
+    "acousticness",
+    "instrumentalness",
+    "liveness",
+    "valence",
+    "tempo"
+]
+
+# Remove missing values
+df = df.dropna(subset=features + ["popularity"])
+
+# X and y
+X = df[features]
+y = df["popularity"]
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Scale data
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+
+# LASSO
+lasso = Lasso(alpha=0.1)
+lasso.fit(X_train_scaled, y_train)
+
+
+# RIDGE
+ridge = Ridge(alpha=0.1)
+ridge.fit(X_train_scaled, y_train)
+
+
+# ELASTIC NET
+elastic = ElasticNet(
+    alpha=0.1,
+    l1_ratio=0.5
+)
+
+elastic.fit(X_train_scaled, y_train)
+
+
+# Compare coefficients
+comparison = pd.DataFrame({
+    "Feature": features,
+    "Lasso": lasso.coef_,
+    "Ridge": ridge.coef_,
+    "ElasticNet": elastic.coef_
+})
+
+print(comparison)
+
+
+# Lasso feature selection
+print("\nLASSO FEATURE SELECTION")
+
+for feature, coefficient in zip(features, lasso.coef_):
+
+    if coefficient == 0:
+        print(feature, "-> DROPPED")
+    else:
+        print(feature, "-> KEPT")
+
+
+FINAL CONCLUSION:
+
+Lasso regression uses L1 regularization and can completely remove unimportant features by making their coefficients zero. Ridge regression uses L2 regularization and generally shrinks coefficients without removing features completely. ElasticNet combines both methods, providing a balance between feature selection and coefficient shrinkage.
