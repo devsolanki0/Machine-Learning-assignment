@@ -1,0 +1,46 @@
+
+
+## 1. Three daily apps and their ML features
+
+| App           | ML Feature                                                                  | Type of Learning          |
+| ------------- | --------------------------------------------------------------------------- | ------------------------- |
+| **Instagram** | Recommends posts/reels based on your interests and previous activity.       | **Supervised Learning**   |
+| **Zomato**    | Recommends restaurants or dishes based on your previous orders and ratings. | **Supervised Learning**   |
+| **Flipkart**  | Recommends products similar to the ones you searched for or purchased.      | **Unsupervised Learning** |
+
+> *Note: Real-world recommendation systems often combine multiple ML techniques, so these classifications are simplified examples.*
+
+## 2. Classify the scenarios
+
+1. **Netflix recommending movies based on watch history — Supervised Learning**
+   It can learn from historical user preferences and interactions to predict what a user may like.
+
+2. **Spotify grouping similar songs into playlists — Unsupervised Learning**
+   It can identify groups of similar songs based on their characteristics without predefined labels.
+
+3. **Self-driving car learning to park by trial and error — Reinforcement Learning**
+   The car learns by taking actions and receiving rewards or penalties based on the result.
+
+## 3. Basic ML workflow for Swiggy
+
+![Image](https://images.openai.com/static-rsc-4/q4F1EuuSWGkrMz1HFVXCN56xSW4CN_G5gIK7qmBp4fzq57mGyhwY1eXQ26usF5ielmWTSPKYC8oVioAzeunzucjBx4ea5BIJfG_SDfJHz8xqA58dgRd5olg13HO4Tf59s5IfPByeRicXyYuK9KUyqiezIjoWLdjbU-yOJ41oOJk8Vl_wLmraGfWT-bslPutd?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/YXFzqPKm-akvFCdU8xHJ-jPol1DWTaa4OxpPubS32zNTaSi1o3mZv86QGBF4qDPaW34ndHNl2m2ZwEjEu03VHXqppmS5kyyB_FCG_zdFiSAFxgVXENR3AWs8sq6hU4H72Mcj_nJHU6n4TbsuukW3O6HU4h4OUCPGSLiS2MeBNxDUSGz5AI2prnwIIoJaBWjM?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/3p0WXM1ZodoIGCNwcBzHnAKwQeZOWht-OtmM3xdA1y7Zhr-5-shieKyPsqS4DpzARIAYjs8UhOALB2S2D12T5y15D0juTwtlPF-9AzZx7P0aFQ8uGt9v32ejh54l_Sdi0kVqzpJDyo3TseinvF4Td_rLiX0rEqBpBEfY4hMVsOrIZbUuJ6FVjY3_NqF9WIwZ?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/-0hXshqRh6fNNYkCERhRjuE-5PZ3el_NxKYj2nz74fN2NZoujMlB9RTzXa28GUeF1tgz6vCJgG4Rl4SYAwvROP8VsjPlKzGdV_sFAWumUxsyfKwnV2WpjsRQ9Z0wqPU9TvEt2QtRBj386nqskUpMPDO1fDae7orpK7qTzVsi_HCAlVF6nQexbX6RD5nwQTDN?purpose=fullsize)
+
+![Image](https://images.openai.com/static-rsc-4/x6MqEDehZCedqIhh2biVcX290emxSGfG7y_lh316_w8c8LRD79y49aDyt9rXXgSI2bSuc0UsDmxc0hZX0K2d757QzfmBdsAs-Dci3ORk1hxQpHX_E2xAoL5snzqcohA9-v2HBKCQ-s4OHmp_4CVviYUOXpwaLk0_G2yoAYSNZskAhKn8tLRgroL7zVFPqjtY?purpose=fullsize)
+
+**Data → Preprocessing → Modeling → Evaluation → Deployment**
+
+* **Data:** Collect customer orders, restaurant details, ratings, and delivery times.
+* **Preprocessing:** Clean missing or incorrect data and convert it into a usable format.
+* **Modeling:** Train a model to predict delivery time or recommend restaurants.
+* **Evaluation:** Check how accurately the model predicts delivery times/recommendations.
+* **Deployment:** Put the trained model into the Swiggy app for real users.
+
+## 4. Traditional Programming vs Machine Learning
+
+A traditional programming approach would use manually created rules to identify spam messages, such as blocking messages containing certain words, links, or phone numbers. These rules must be written and updated by programmers whenever new types of spam appear. In machine learning, the system is trained using a large dataset of spam and non-spam messages. The model learns patterns from the data and uses those patterns to classify new messages as spam or not spam. Therefore, traditional programming mainly depends on **fixed rules**, while machine learning **learns from data**.
