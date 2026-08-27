@@ -1,0 +1,440 @@
+CROSS-VALIDATION AND MODEL EVALUATION
+
+
+TASK 1
+
+Load the Iris dataset and use cross_val_score() with a KNeighborsClassifier to compute the average accuracy using 5-fold cross-validation.
+
+CODE:
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+
+# Load Iris dataset
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+# Create KNN classifier
+model = KNeighborsClassifier(n_neighbors=5)
+
+# 5-fold cross-validation
+scores = cross_val_score(
+    model,
+    X,
+    y,
+    cv=5,
+    scoring="accuracy"
+)
+
+print("Accuracy for each fold:", scores)
+print("Average Accuracy:", scores.mean())
+
+
+EXPLANATION:
+
+The dataset is divided into 5 parts. The model is trained on 4 parts and tested on the remaining part, and this process is repeated 5 times. The average of the five accuracy scores gives the overall cross-validation accuracy.
+
+
+TASK 2
+
+Perform 10-fold cross-validation using cross_val_score() with a DecisionTreeClassifier and print the accuracy for each fold.
+
+CODE:
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import cross_val_score
+from sklearn.tree import DecisionTreeClassifier
+
+# Load Iris dataset
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+# Create Decision Tree
+model = DecisionTreeClassifier(
+    random_state=42
+)
+
+# 10-fold cross-validation
+scores = cross_val_score(
+    model,
+    X,
+    y,
+    cv=10,
+    scoring="accuracy"
+)
+
+print("Accuracy for each fold:")
+
+for i, score in enumerate(scores, start=1):
+    print("Fold", i, ":", score)
+
+print("\nAverage Accuracy:", scores.mean())
+
+
+EXPLANATION:
+
+In 10-fold cross-validation, the dataset is divided into 10 parts. Each part is used once as the test set while the other 9 parts are used for training.
+
+
+TASK 3
+
+Use StratifiedKFold to split the Iris dataset and compare the distribution of target classes in each fold.
+
+CODE:
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import StratifiedKFold
+import numpy as np
+
+# Load Iris dataset
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+# Create StratifiedKFold
+skf = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+# Display class distribution in each fold
+for fold, (train_index, test_index) in enumerate(
+    skf.split(X, y),
+    start=1
+):
+
+    y_test = y[test_index]
+
+    unique, counts = np.unique(
+        y_test,
+        return_counts=True
+    )
+
+    print("Fold", fold)
+
+    for class_value, count in zip(
+        unique,
+        counts
+    ):
+        print(
+            "Class",
+            class_value,
+            ":",
+            count
+        )
+
+    print()
+
+
+EXPLANATION:
+
+StratifiedKFold keeps approximately the same proportion of each target class in every fold. Since the Iris dataset contains three classes with 50 samples each, each fold will contain a similar number of samples from all three classes.
+
+
+TASK 4
+
+Experiment with cv values of 3, 5, and 10 using cross_val_score() for a RandomForestClassifier on the Wine dataset. Find which cv value gives the most stable accuracy scores.
+
+CODE:
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import RandomForestClassifier
+import numpy as np
+
+# Load Wine dataset
+wine = load_wine()
+
+X = wine.data
+y = wine.target
+
+# Create Random Forest
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+# Test different cv values
+for cv_value in [3, 5, 10]:
+
+    scores = cross_val_score(
+        model,
+        X,
+        y,
+        cv=cv_value,
+        scoring="accuracy"
+    )
+
+    print("\nCV =", cv_value)
+
+    print("Scores:", scores)
+
+    print("Mean Accuracy:", scores.mean())
+
+    print("Standard Deviation:", scores.std())
+
+
+EXPLANATION:
+
+The standard deviation shows how much the accuracy changes between folds. A lower standard deviation means the scores are more stable.
+
+The cv value with the lowest standard deviation is considered the most stable for this experiment. The exact result may vary depending on the scikit-learn version and settings.
+
+
+TASK 5
+
+Create a general function that accepts any classifier and dataset, performs k-fold cross-validation, and returns the mean and standard deviation of the scores.
+
+CODE:
+
+from sklearn.model_selection import cross_val_score
+
+
+def evaluate_model(model, X, y, k=5):
+
+    # Perform cross-validation
+    scores = cross_val_score(
+        model,
+        X,
+        y,
+        cv=k,
+        scoring="accuracy"
+    )
+
+    # Calculate mean and standard deviation
+    mean_score = scores.mean()
+    std_score = scores.std()
+
+    return mean_score, std_score
+
+
+# Example using KNN
+from sklearn.datasets import load_iris
+from sklearn.neighbors import KNeighborsClassifier
+
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+model = KNeighborsClassifier(
+    n_neighbors=5
+)
+
+mean, std = evaluate_model(
+    model,
+    X,
+    y,
+    k=5
+)
+
+print("Mean Accuracy:", mean)
+print("Standard Deviation:", std)
+
+
+EXPLANATION:
+
+The function makes the code reusable because any compatible classifier can be passed to it. ChatGPT helped simplify the solution by placing the cross-validation process, mean calculation, and standard deviation calculation inside one reusable function.
+
+
+COMPLETE CODE
+
+from sklearn.datasets import load_iris, load_wine
+from sklearn.model_selection import (
+    train_test_split,
+    cross_val_score,
+    StratifiedKFold
+)
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+import numpy as np
+
+
+# ==========================================
+# TASK 1: KNN 5-FOLD CROSS-VALIDATION
+# ==========================================
+
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+knn = KNeighborsClassifier(
+    n_neighbors=5
+)
+
+scores = cross_val_score(
+    knn,
+    X,
+    y,
+    cv=5,
+    scoring="accuracy"
+)
+
+print("TASK 1")
+print("Fold Accuracies:", scores)
+print("Average Accuracy:", scores.mean())
+
+
+# ==========================================
+# TASK 2: DECISION TREE 10-FOLD CV
+# ==========================================
+
+tree = DecisionTreeClassifier(
+    random_state=42
+)
+
+scores = cross_val_score(
+    tree,
+    X,
+    y,
+    cv=10,
+    scoring="accuracy"
+)
+
+print("\nTASK 2")
+print("Decision Tree Fold Accuracies:")
+
+for i, score in enumerate(scores, start=1):
+    print("Fold", i, ":", score)
+
+print("Average Accuracy:", scores.mean())
+
+
+# ==========================================
+# TASK 3: STRATIFIED K-FOLD
+# ==========================================
+
+skf = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+print("\nTASK 3")
+
+for fold, (train_index, test_index) in enumerate(
+    skf.split(X, y),
+    start=1
+):
+
+    y_test = y[test_index]
+
+    unique, counts = np.unique(
+        y_test,
+        return_counts=True
+    )
+
+    print("Fold", fold, "Class Counts:")
+
+    for class_value, count in zip(
+        unique,
+        counts
+    ):
+        print(
+            "Class",
+            class_value,
+            "=",
+            count
+        )
+
+
+# ==========================================
+# TASK 4: WINE DATASET
+# ==========================================
+
+wine = load_wine()
+
+X_wine = wine.data
+y_wine = wine.target
+
+forest = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+print("\nTASK 4")
+
+results = {}
+
+for cv_value in [3, 5, 10]:
+
+    scores = cross_val_score(
+        forest,
+        X_wine,
+        y_wine,
+        cv=cv_value,
+        scoring="accuracy"
+    )
+
+    mean = scores.mean()
+    std = scores.std()
+
+    results[cv_value] = std
+
+    print(
+        "CV =", cv_value,
+        "Mean =", mean,
+        "Std =", std
+    )
+
+# Find most stable CV value
+best_cv = min(
+    results,
+    key=results.get
+)
+
+print(
+    "\nMost Stable CV:",
+    best_cv
+)
+
+
+# ==========================================
+# TASK 5: REUSABLE FUNCTION
+# ==========================================
+
+def evaluate_model(model, X, y, k=5):
+
+    scores = cross_val_score(
+        model,
+        X,
+        y,
+        cv=k,
+        scoring="accuracy"
+    )
+
+    mean_score = scores.mean()
+    std_score = scores.std()
+
+    return mean_score, std_score
+
+
+# Test function
+model = KNeighborsClassifier(
+    n_neighbors=5
+)
+
+mean, std = evaluate_model(
+    model,
+    iris.data,
+    iris.target,
+    k=5
+)
+
+print("\nTASK 5")
+print("Mean Accuracy:", mean)
+print("Standard Deviation:", std)
+
+
+FINAL CONCLUSION:
+
+Cross-validation is a useful technique for evaluating machine learning models on multiple train-test splits. K-fold cross-validation provides a more reliable estimate of model performance, while StratifiedKFold ensures that class proportions remain similar across folds. A lower standard deviation indicates that the model's performance is more stable across different folds.
