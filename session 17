@@ -1,0 +1,475 @@
+CREDIT CARD FRAUD DETECTION – IMBALANCED CLASSIFICATION
+
+
+TASK 1
+
+Download a sample credit card fraud dataset from Kaggle or UCI, split it into train and test sets, and train a Logistic Regression classifier.
+
+CODE:
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+
+# Load credit card fraud dataset
+df = pd.read_csv("creditcard.csv")
+
+# Features and target
+X = df.drop("Class", axis=1)
+y = df["Class"]
+
+# Split into training and testing data
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+# Scale the features
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Create Logistic Regression model
+model = LogisticRegression(
+    max_iter=1000,
+    class_weight="balanced",
+    random_state=42
+)
+
+# Train model
+model.fit(X_train_scaled, y_train)
+
+# Predict probabilities
+y_prob = model.predict_proba(X_test_scaled)[:, 1]
+
+# Predict classes
+y_pred = model.predict(X_test_scaled)
+
+print("Model training completed.")
+print("Training rows:", len(X_train))
+print("Testing rows:", len(X_test))
+
+
+EXPLANATION:
+
+The dataset contains a very small number of fraud transactions compared with normal transactions, making it an imbalanced classification problem. StandardScaler is used to scale the numerical features before training Logistic Regression.
+
+
+TASK 2
+
+Plot the ROC curve and display the AUC score.
+
+CODE:
+
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, roc_auc_score
+
+# Calculate ROC values
+fpr, tpr, thresholds = roc_curve(
+    y_test,
+    y_prob
+)
+
+# Calculate AUC
+auc_score = roc_auc_score(
+    y_test,
+    y_prob
+)
+
+# Plot ROC curve
+plt.figure(figsize=(8, 6))
+
+plt.plot(
+    fpr,
+    tpr,
+    label="ROC Curve (AUC = {:.3f})".format(auc_score)
+)
+
+# Random classifier line
+plt.plot(
+    [0, 1],
+    [0, 1],
+    linestyle="--",
+    label="Random Classifier"
+)
+
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curve - Credit Card Fraud Detection")
+plt.legend()
+plt.grid()
+
+plt.show()
+
+print("AUC Score:", auc_score)
+
+
+EXPLANATION:
+
+AUC measures how well the model separates fraudulent transactions from normal transactions across different classification thresholds. A higher AUC, closer to 1, generally indicates better discrimination.
+
+
+TASK 3
+
+Plot the Precision-Recall curve and explain why it is useful for an imbalanced dataset.
+
+CODE:
+
+from sklearn.metrics import precision_recall_curve
+
+# Calculate Precision-Recall values
+precision, recall, thresholds = precision_recall_curve(
+    y_test,
+    y_prob
+)
+
+# Plot Precision-Recall curve
+plt.figure(figsize=(8, 6))
+
+plt.plot(
+    recall,
+    precision,
+    label="Precision-Recall Curve"
+)
+
+plt.xlabel("Recall")
+plt.ylabel("Precision")
+plt.title("Precision-Recall Curve - Fraud Detection")
+plt.legend()
+plt.grid()
+
+plt.show()
+
+
+EXPLANATION:
+
+The Precision-Recall curve is useful for imbalanced datasets because it focuses on the performance of the minority/positive class and shows the trade-off between correctly detecting fraud and avoiding false fraud alerts.
+
+
+TASK 4
+
+Calculate the Log Loss (Cross-Entropy Loss) for the test set predictions.
+
+CODE:
+
+from sklearn.metrics import log_loss
+
+# Calculate Log Loss
+loss = log_loss(
+    y_test,
+    y_prob
+)
+
+print("Log Loss:", loss)
+
+
+EXPLANATION:
+
+Log Loss measures how close the predicted probabilities are to the actual class labels. A lower Log Loss means the model's predicted probabilities are generally better calibrated and more accurate.
+
+
+TASK 5
+
+Change the class distribution in the test set to be even more imbalanced, with approximately 2% positive class. Recalculate accuracy, AUC, and Log Loss.
+
+CODE:
+
+from sklearn.metrics import accuracy_score, roc_auc_score, log_loss
+
+# Separate normal and fraud transactions
+normal = df[df["Class"] == 0]
+fraud = df[df["Class"] == 1]
+
+# Keep approximately 2% fraud transactions
+# For example, 49 fraud transactions and 2401 normal transactions
+fraud_sample = fraud.sample(
+    n=min(49, len(fraud)),
+    random_state=42
+)
+
+normal_sample = normal.sample(
+    n=min(2401, len(normal)),
+    random_state=42
+)
+
+# Combine the samples
+imbalanced_test = pd.concat(
+    [normal_sample, fraud_sample]
+).sample(
+    frac=1,
+    random_state=42
+)
+
+# Separate features and target
+X_imbalanced = imbalanced_test.drop(
+    "Class",
+    axis=1
+)
+
+y_imbalanced = imbalanced_test["Class"]
+
+# Scale using the already fitted scaler
+X_imbalanced_scaled = scaler.transform(
+    X_imbalanced
+)
+
+# Get predictions
+y_imbalanced_prob = model.predict_proba(
+    X_imbalanced_scaled
+)[:, 1]
+
+y_imbalanced_pred = model.predict(
+    X_imbalanced_scaled
+)
+
+# Calculate metrics
+accuracy = accuracy_score(
+    y_imbalanced,
+    y_imbalanced_pred
+)
+
+auc = roc_auc_score(
+    y_imbalanced,
+    y_imbalanced_prob
+)
+
+loss = log_loss(
+    y_imbalanced,
+    y_imbalanced_prob
+)
+
+print("Positive Class Percentage:",
+      y_imbalanced.mean() * 100)
+
+print("Accuracy:", accuracy)
+
+print("AUC:", auc)
+
+print("Log Loss:", loss)
+
+
+EXPLANATION:
+
+Accuracy can be misleading for highly imbalanced data because a model can achieve very high accuracy simply by predicting almost every transaction as normal.
+
+AUC and Precision-Recall analysis are more informative because they evaluate how well the model distinguishes and identifies the rare fraud cases.
+
+
+IMPORTANT NOTE:
+
+In Task 5, the test set is intentionally constructed to contain approximately 2% fraud cases. The exact accuracy, AUC, and Log Loss values depend on the downloaded dataset and the random sample.
+
+
+COMPLETE CODE
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+
+from sklearn.metrics import (
+    accuracy_score,
+    roc_curve,
+    roc_auc_score,
+    precision_recall_curve,
+    log_loss
+)
+
+
+# ==========================================
+# TASK 1: LOAD AND TRAIN MODEL
+# ==========================================
+
+df = pd.read_csv("creditcard.csv")
+
+X = df.drop("Class", axis=1)
+y = df["Class"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+model = LogisticRegression(
+    max_iter=1000,
+    class_weight="balanced",
+    random_state=42
+)
+
+model.fit(X_train_scaled, y_train)
+
+y_pred = model.predict(X_test_scaled)
+y_prob = model.predict_proba(
+    X_test_scaled
+)[:, 1]
+
+print("Model trained successfully.")
+
+
+# ==========================================
+# TASK 2: ROC CURVE AND AUC
+# ==========================================
+
+fpr, tpr, thresholds = roc_curve(
+    y_test,
+    y_prob
+)
+
+auc_score = roc_auc_score(
+    y_test,
+    y_prob
+)
+
+plt.figure(figsize=(8, 6))
+
+plt.plot(
+    fpr,
+    tpr,
+    label="ROC Curve (AUC = {:.3f})".format(
+        auc_score
+    )
+)
+
+plt.plot(
+    [0, 1],
+    [0, 1],
+    linestyle="--",
+    label="Random Classifier"
+)
+
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curve")
+plt.legend()
+plt.grid()
+plt.show()
+
+print("AUC:", auc_score)
+
+
+# ==========================================
+# TASK 3: PRECISION-RECALL CURVE
+# ==========================================
+
+precision, recall, thresholds = precision_recall_curve(
+    y_test,
+    y_prob
+)
+
+plt.figure(figsize=(8, 6))
+
+plt.plot(
+    recall,
+    precision,
+    label="Precision-Recall Curve"
+)
+
+plt.xlabel("Recall")
+plt.ylabel("Precision")
+plt.title("Precision-Recall Curve")
+plt.legend()
+plt.grid()
+plt.show()
+
+
+# ==========================================
+# TASK 4: LOG LOSS
+# ==========================================
+
+loss = log_loss(
+    y_test,
+    y_prob
+)
+
+print("Log Loss:", loss)
+
+
+# ==========================================
+# TASK 5: 2% POSITIVE CLASS
+# ==========================================
+
+normal = df[df["Class"] == 0]
+fraud = df[df["Class"] == 1]
+
+fraud_sample = fraud.sample(
+    n=min(49, len(fraud)),
+    random_state=42
+)
+
+normal_sample = normal.sample(
+    n=min(2401, len(normal)),
+    random_state=42
+)
+
+imbalanced_test = pd.concat(
+    [normal_sample, fraud_sample]
+).sample(
+    frac=1,
+    random_state=42
+)
+
+X_imbalanced = imbalanced_test.drop(
+    "Class",
+    axis=1
+)
+
+y_imbalanced = imbalanced_test["Class"]
+
+X_imbalanced_scaled = scaler.transform(
+    X_imbalanced
+)
+
+y_imbalanced_prob = model.predict_proba(
+    X_imbalanced_scaled
+)[:, 1]
+
+y_imbalanced_pred = model.predict(
+    X_imbalanced_scaled
+)
+
+accuracy = accuracy_score(
+    y_imbalanced,
+    y_imbalanced_pred
+)
+
+auc = roc_auc_score(
+    y_imbalanced,
+    y_imbalanced_prob
+)
+
+loss = log_loss(
+    y_imbalanced,
+    y_imbalanced_prob
+)
+
+print("\n2% IMBALANCED TEST SET")
+print(
+    "Positive Class:",
+    y_imbalanced.mean() * 100,
+    "%"
+)
+
+print("Accuracy:", accuracy)
+print("AUC:", auc)
+print("Log Loss:", loss)
+
+
+FINAL CONCLUSION:
+
+Credit card fraud detection is a highly imbalanced classification problem because fraudulent transactions are much less common than normal transactions. ROC-AUC, Precision-Recall curves, and Log Loss provide more useful information than accuracy alone when evaluating a model on such data.
