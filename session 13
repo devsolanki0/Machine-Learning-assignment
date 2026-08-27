@@ -1,0 +1,380 @@
+RANDOM FOREST CLASSIFICATION
+
+
+TASK 1
+
+Load the Iris dataset using scikit-learn, split it into train and test sets, and train a RandomForestClassifier with default parameters. Print the accuracy on the test set.
+
+CODE:
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# Load Iris dataset
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+# Split dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=42
+)
+
+# Create Random Forest with default parameters
+model = RandomForestClassifier(
+    random_state=42
+)
+
+# Train model
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Calculate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Random Forest Test Accuracy:", accuracy)
+
+
+EXPLANATION:
+
+Random Forest combines many decision trees and uses their combined predictions to classify new data. On the Iris dataset, it usually achieves very high test accuracy.
+
+
+TASK 2
+
+Create a small Flipkart-style dataset with 20 products containing price, rating, brand, and category. Use RandomForestClassifier to predict the product category and print feature importance values.
+
+CODE:
+
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
+
+# Create a small Flipkart-style dataset
+data = {
+    "price": [
+        500, 700, 1000, 1200, 1500,
+        2000, 2500, 3000, 3500, 4000,
+        4500, 5000, 5500, 6000, 6500,
+        7000, 7500, 8000, 8500, 9000
+    ],
+
+    "rating": [
+        3.5, 4.0, 3.8, 4.2, 4.5,
+        3.9, 4.1, 4.3, 4.6, 4.0,
+        4.2, 4.5, 3.7, 4.4, 4.6,
+        4.1, 4.3, 4.7, 4.5, 4.8
+    ],
+
+    "brand": [
+        "A", "A", "B", "B", "C",
+        "C", "A", "B", "C", "A",
+        "B", "C", "A", "B", "C",
+        "A", "B", "C", "A", "B"
+    ],
+
+    "category": [
+        "Mobile", "Mobile", "Mobile", "Mobile", "Mobile",
+        "Laptop", "Laptop", "Laptop", "Laptop", "Laptop",
+        "Laptop", "Laptop", "TV", "TV", "TV",
+        "TV", "TV", "TV", "TV", "TV"
+    ]
+}
+
+df = pd.DataFrame(data)
+
+# Convert brand into numerical values
+encoder = LabelEncoder()
+
+df["brand_encoded"] = encoder.fit_transform(df["brand"])
+
+# Features
+X = df[["price", "rating", "brand_encoded"]]
+
+# Target
+y = df["category"]
+
+# Create Random Forest
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+# Train model
+model.fit(X, y)
+
+# Feature importance
+importance = pd.DataFrame({
+    "Feature": X.columns,
+    "Importance": model.feature_importances_
+})
+
+# Sort by importance
+importance = importance.sort_values(
+    by="Importance",
+    ascending=False
+)
+
+print("Feature Importance:")
+print(importance)
+
+
+EXPLANATION:
+
+Feature importance tells us how much each feature contributes to the Random Forest's classification decisions. A higher importance value means that the feature was more useful for separating the product categories.
+
+
+TASK 3
+
+Tune n_estimators and max_depth by trying at least 3 different values for each and report the best combination.
+
+CODE:
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# Load Iris dataset
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=42
+)
+
+# Values to test
+n_estimators_values = [10, 50, 100]
+max_depth_values = [2, 4, 6]
+
+best_accuracy = 0
+best_parameters = None
+
+# Try all combinations
+for n in n_estimators_values:
+
+    for depth in max_depth_values:
+
+        model = RandomForestClassifier(
+            n_estimators=n,
+            max_depth=depth,
+            random_state=42
+        )
+
+        model.fit(X_train, y_train)
+
+        predictions = model.predict(X_test)
+
+        accuracy = accuracy_score(
+            y_test,
+            predictions
+        )
+
+        print(
+            "n_estimators =", n,
+            "max_depth =", depth,
+            "Accuracy =", accuracy
+        )
+
+        # Store best result
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            best_parameters = (n, depth)
+
+
+print("\nBest Accuracy:", best_accuracy)
+
+print(
+    "Best n_estimators:",
+    best_parameters[0]
+)
+
+print(
+    "Best max_depth:",
+    best_parameters[1]
+)
+
+
+EXPLANATION:
+
+n_estimators controls the number of decision trees in the forest. max_depth controls how deep each tree can grow. The combination that produces the highest test accuracy is selected as the best combination for this particular train-test split.
+
+
+TASK 4
+
+Compare a single DecisionTreeClassifier with a RandomForestClassifier on the same dataset.
+
+CODE:
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# Decision Tree
+tree_model = DecisionTreeClassifier(
+    random_state=42
+)
+
+tree_model.fit(X_train, y_train)
+
+tree_pred = tree_model.predict(X_test)
+
+tree_accuracy = accuracy_score(
+    y_test,
+    tree_pred
+)
+
+
+# Random Forest
+forest_model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+forest_model.fit(X_train, y_train)
+
+forest_pred = forest_model.predict(X_test)
+
+forest_accuracy = accuracy_score(
+    y_test,
+    forest_pred
+)
+
+
+print("Decision Tree Accuracy:", tree_accuracy)
+print("Random Forest Accuracy:", forest_accuracy)
+
+
+EXPLANATION:
+
+A single decision tree can easily become too specialized to the training data and overfit. Random Forest uses many trees trained on different samples and combines their predictions, which usually reduces variance and produces more stable predictions.
+
+
+TASK 5
+
+Build a Random Forest classifier using a Spotify song CSV to predict whether a song will be a hit.
+
+For this example, the CSV file should contain these columns:
+
+tempo
+danceability
+energy
+popularity
+hit
+
+
+CODE:
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# Load Spotify CSV file
+df = pd.read_csv("spotify_songs.csv")
+
+# Remove missing values
+df = df.dropna(
+    subset=[
+        "tempo",
+        "danceability",
+        "energy",
+        "popularity",
+        "hit"
+    ]
+)
+
+# Features
+X = df[
+    [
+        "tempo",
+        "danceability",
+        "energy",
+        "popularity"
+    ]
+]
+
+# Target
+y = df["hit"]
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+# Create Random Forest
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+# Train
+model.fit(X_train, y_train)
+
+# Predict
+y_pred = model.predict(X_test)
+
+# Accuracy
+accuracy = accuracy_score(
+    y_test,
+    y_pred
+)
+
+print("Spotify Hit Prediction Accuracy:", accuracy)
+
+
+# Feature importance
+importance = pd.DataFrame({
+    "Feature": X.columns,
+    "Importance": model.feature_importances_
+})
+
+importance = importance.sort_values(
+    by="Importance",
+    ascending=False
+)
+
+print("\nFeature Importance:")
+print(importance)
+
+
+EXPLANATION:
+
+The Random Forest uses tempo, danceability, energy, and popularity to learn patterns associated with hit and non-hit songs. The feature importance values show which features were most useful for making the predictions.
+
+
+AI-GENERATED CODE AND CHANGES MADE:
+
+I used ChatGPT to generate the initial Random Forest code.
+
+Changes made:
+
+1. Added dropna() to remove rows containing missing values.
+2. Used train_test_split() to divide the data into training and testing sets.
+3. Added random_state=42 so that the results are reproducible.
+4. Added feature importance to understand which song features contribute most to the prediction.
+
+ONE THING I LEARNED:
+
+I learned that Random Forest does not rely on a single decision tree. It combines predictions from many trees, which generally makes the model more stable and helps reduce overfitting.
+
+
+FINAL CONCLUSION:
+
+Random Forest is an ensemble machine learning algorithm that combines multiple decision trees. It can provide strong classification performance and also gives feature importance values. Increasing the number of trees can make predictions more stable, while limiting max_depth can help control model complexity and reduce overfitting.
