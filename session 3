@@ -1,0 +1,98 @@
+IPL DATA PREPROCESSING USING PANDAS AND SKLEARN
+
+
+TASK 1
+
+Download a small sample IPL match dataset (CSV) with some missing values in player stats. Load it using pandas and print the number of missing values in each column.
+
+CODE:
+
+import pandas as pd
+
+# Load IPL dataset
+df = pd.read_csv("ipl_data.csv")
+
+# Display first 5 rows
+print(df.head())
+
+# Count missing values in each column
+print("Missing values in each column:")
+print(df.isnull().sum())
+
+
+TASK 2
+
+For the 'player_age' column in your IPL dataset, fill all missing values with the median age using pandas' fillna() method and display the updated column.
+
+CODE:
+
+# Find the median age
+median_age = df["player_age"].median()
+
+# Fill missing ages with median age
+df["player_age"] = df["player_age"].fillna(median_age)
+
+# Display updated column
+print(df["player_age"])
+
+
+TASK 3
+
+Suppose the 'team' column in your IPL dataset contains missing values. Replace all missing team names with the constant value 'Unknown' and print the first 10 rows.
+
+CODE:
+
+# Replace missing team names with "Unknown"
+df["team"] = df["team"].fillna("Unknown")
+
+# Display first 10 rows
+print(df.head(10))
+
+
+TASK 4
+
+Take the 'venue' column (categorical) from your IPL dataset and apply one-hot encoding using pandas' get_dummies(). Show the resulting DataFrame with the new columns.
+
+CODE:
+
+# Apply one-hot encoding to the venue column
+venue_encoded = pd.get_dummies(df["venue"], prefix="venue")
+
+# Display the resulting DataFrame
+print(venue_encoded)
+
+
+TASK 5
+
+Use LabelEncoder from sklearn to encode the 'player_role' column (e.g., Batsman, Bowler, Allrounder) in your IPL dataset, and display the mapping from original roles to encoded values.
+
+CODE:
+
+from sklearn.preprocessing import LabelEncoder
+
+# Create LabelEncoder
+encoder = LabelEncoder()
+
+# Encode player roles
+df["player_role_encoded"] = encoder.fit_transform(df["player_role"])
+
+# Display original roles and encoded values
+print(df[["player_role", "player_role_encoded"]].drop_duplicates())
+
+# Display the mapping
+print("\nMapping:")
+for role, value in zip(encoder.classes_, encoder.transform(encoder.classes_)):
+    print(role, "=", value)
+
+
+EXPLANATION:
+
+LabelEncoder assigns a unique numerical value to each player role.
+
+For example, the mapping may look like:
+
+Allrounder = 0
+Batsman = 1
+Bowler = 2
+
+The exact numbers are assigned alphabetically by LabelEncoder, so the mapping depends on the unique values present in the dataset.
