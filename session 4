@@ -1,0 +1,238 @@
+IPL, FLIPKART, SPOTIFY, ZOMATO AND BOOKMYSHOW – DATA PREPROCESSING
+
+
+TASK 1
+
+Download a small dataset of IPL cricket player stats (e.g., runs, wickets, matches, strike rate) and apply StandardScaler from scikit-learn to scale all numeric features. Save the scaled data to a new CSV file named ipl_scaled.csv.
+
+CODE:
+
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+# Load IPL dataset
+df = pd.read_csv("ipl_stats.csv")
+
+# Select numeric features
+features = ["runs", "wickets", "matches", "strike_rate"]
+
+X = df[features]
+
+# Create StandardScaler
+scaler = StandardScaler()
+
+# Scale the numeric features
+X_scaled = scaler.fit_transform(X)
+
+# Convert scaled data back to DataFrame
+scaled_df = pd.DataFrame(X_scaled, columns=features)
+
+# Save scaled data to CSV
+scaled_df.to_csv("ipl_scaled.csv", index=False)
+
+print("Scaled data:")
+print(scaled_df.head())
+
+print("\nFile saved as ipl_scaled.csv")
+
+
+EXPLANATION:
+
+StandardScaler transforms the numeric features so that they have approximately a mean of 0 and a standard deviation of 1. The scaled data is saved as ipl_scaled.csv.
+
+
+TASK 2
+
+Using a dataset of Flipkart product ratings, apply MinMaxScaler so that all features are scaled between 0 and 1. Print the minimum and maximum value for each column before and after scaling.
+
+CODE:
+
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+
+# Load Flipkart dataset
+df = pd.read_csv("flipkart_products.csv")
+
+# Select features
+features = ["price", "rating", "number_of_reviews", "discount"]
+
+X = df[features]
+
+# Minimum and maximum values before scaling
+print("Before Scaling:")
+print("Minimum values:")
+print(X.min())
+
+print("\nMaximum values:")
+print(X.max())
+
+# Apply MinMaxScaler
+scaler = MinMaxScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Convert to DataFrame
+scaled_df = pd.DataFrame(X_scaled, columns=features)
+
+# Minimum and maximum values after scaling
+print("\nAfter Scaling:")
+print("Minimum values:")
+print(scaled_df.min())
+
+print("\nMaximum values:")
+print(scaled_df.max())
+
+
+EXPLANATION:
+
+MinMaxScaler converts each feature into a range between 0 and 1. Therefore, after scaling, the minimum value of each column should be 0 and the maximum value should be 1.
+
+
+TASK 3
+
+Given a Spotify songs dataset with features danceability, energy, tempo, and popularity, use correlation analysis to select the top 2 features most related to popularity.
+
+CODE:
+
+import pandas as pd
+
+# Load Spotify dataset
+df = pd.read_csv("spotify_songs.csv")
+
+# Calculate correlations with popularity
+correlation = df[["danceability", "energy", "tempo", "popularity"]].corr()
+
+print("Correlation with popularity:")
+print(correlation["popularity"])
+
+# Remove popularity itself and find top 2 features
+top_features = correlation["popularity"].drop("popularity").abs().sort_values(ascending=False).head(2)
+
+print("\nTop 2 features:")
+print(top_features)
+
+
+ANSWER:
+
+The two selected features will be the two features with the highest absolute correlation with popularity.
+
+For example:
+
+1. Danceability – Selected because it has a strong correlation with the popularity score.
+
+2. Energy – Selected because it has the second strongest correlation with the popularity score.
+
+NOTE:
+
+The exact top 2 features depend on the actual Spotify dataset. The code automatically selects the correct two features based on the dataset.
+
+
+TASK 4
+
+Take a Zomato restaurant dataset and use scikit-learn's RFE (Recursive Feature Elimination) with a DecisionTreeRegressor to select the 3 most important features for predicting 'average cost for two'.
+
+CODE:
+
+import pandas as pd
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.feature_selection import RFE
+
+# Load Zomato dataset
+df = pd.read_csv("zomato.csv")
+
+# Select features
+features = ["votes", "rating", "price_range", "table_booking", "online_order"]
+
+X = df[features]
+y = df["average_cost_for_two"]
+
+# Create Decision Tree model
+model = DecisionTreeRegressor(random_state=42)
+
+# Apply RFE to select 3 features
+rfe = RFE(estimator=model, n_features_to_select=3)
+rfe.fit(X, y)
+
+# Display selected features
+selected_features = X.columns[rfe.support_]
+
+print("Selected Features:")
+print(selected_features)
+
+# Display RFE ranking
+print("\nRFE Ranking:")
+for feature, rank in zip(X.columns, rfe.ranking_):
+    print(feature, "=", rank)
+
+
+EXPLANATION:
+
+RFE repeatedly removes the least important features until only the required number of features remains. The features with RFE ranking 1 are the three selected features.
+
+Example output:
+
+Selected Features:
+rating
+votes
+price_range
+
+RFE Ranking:
+votes = 1
+rating = 1
+price_range = 1
+table_booking = 2
+online_order = 3
+
+NOTE:
+
+The exact selected features and rankings depend on the actual Zomato dataset.
+
+
+TASK 5
+
+Given a BookMyShow movie ratings dataset, detect outliers in the 'user ratings' column using the IQR method. Remove the outliers and display how many rows were dropped.
+
+CODE:
+
+import pandas as pd
+
+# Load BookMyShow dataset
+df = pd.read_csv("bookmyshow_movies.csv")
+
+# Calculate Q1 and Q3
+Q1 = df["user ratings"].quantile(0.25)
+Q3 = df["user ratings"].quantile(0.75)
+
+# Calculate IQR
+IQR = Q3 - Q1
+
+# Calculate lower and upper limits
+lower_limit = Q1 - 1.5 * IQR
+upper_limit = Q3 + 1.5 * IQR
+
+print("Q1:", Q1)
+print("Q3:", Q3)
+print("IQR:", IQR)
+print("Lower Limit:", lower_limit)
+print("Upper Limit:", upper_limit)
+
+# Remove outliers
+df_clean = df[
+    (df["user ratings"] >= lower_limit) &
+    (df["user ratings"] <= upper_limit)
+]
+
+# Calculate number of dropped rows
+rows_dropped = len(df) - len(df_clean)
+
+print("\nRows dropped:", rows_dropped)
+print("Rows remaining:", len(df_clean))
+
+
+EXPLANATION:
+
+The IQR method identifies values below Q1 - 1.5 × IQR or above Q3 + 1.5 × IQR as outliers. These rows are removed from the dataset, and the difference between the original and cleaned dataset gives the number of rows dropped.
+
+
+OVERALL CONCLUSION:
+
+StandardScaler is useful when numeric features have different scales. MinMaxScaler converts values into a 0 to 1 range. Correlation helps identify features related to a target variable. RFE selects the most useful features for a model, while the IQR method helps detect and remove extreme values or outliers.
