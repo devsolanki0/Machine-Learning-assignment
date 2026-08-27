@@ -1,0 +1,248 @@
+CONFUSION MATRIX AND CLASSIFICATION METRICS
+
+
+TASK 1
+
+Given the following confusion matrix from a spam filter:
+
+TP = 50
+TN = 120
+FP = 10
+FN = 20
+
+Calculate Accuracy, Precision, Recall, and F1 Score manually.
+
+FORMULAS:
+
+Accuracy = (TP + TN) / (TP + TN + FP + FN)
+
+Precision = TP / (TP + FP)
+
+Recall = TP / (TP + FN)
+
+F1 Score = 2 * (Precision * Recall) / (Precision + Recall)
+
+
+CALCULATION:
+
+Total = 50 + 120 + 10 + 20
+      = 200
+
+Accuracy:
+
+= (50 + 120) / 200
+= 170 / 200
+= 0.85
+
+Accuracy = 85%
+
+
+Precision:
+
+= 50 / (50 + 10)
+= 50 / 60
+= 0.8333
+
+Precision = 83.33%
+
+
+Recall:
+
+= 50 / (50 + 20)
+= 50 / 70
+= 0.7143
+
+Recall = 71.43%
+
+
+F1 Score:
+
+= 2 * (0.8333 * 0.7143) / (0.8333 + 0.7143)
+
+= 0.7692
+
+F1 Score = 76.92%
+
+
+FINAL ANSWERS:
+
+Accuracy = 85%
+Precision = 83.33%
+Recall = 71.43%
+F1 Score = 76.92%
+
+
+TASK 2
+
+Write a Python function called print_confusion_matrix(tp, tn, fp, fn) that prints the confusion matrix in a readable table format.
+
+CODE:
+
+def print_confusion_matrix(tp, tn, fp, fn):
+
+    print("Confusion Matrix")
+    print("---------------------------")
+    print("                 Predicted")
+    print("              Spam   Not Spam")
+    print("Actual Spam    ", tp, "     ", fn)
+    print("Actual Not Spam", fp, "     ", tn)
+    print("---------------------------")
+
+
+# Example
+print_confusion_matrix(50, 120, 10, 20)
+
+
+EXPECTED OUTPUT:
+
+Confusion Matrix
+---------------------------
+                 Predicted
+              Spam   Not Spam
+Actual Spam     50       20
+Actual Not Spam 10       120
+---------------------------
+
+
+TASK 3
+
+A fake news detection model has:
+
+TP = 60
+FN = 30
+TN = 120
+FP = 10
+
+Calculate and print precision and recall.
+
+CODE:
+
+tp = 60
+fn = 30
+tn = 120
+fp = 10
+
+# Calculate precision
+precision = tp / (tp + fp)
+
+# Calculate recall
+recall = tp / (tp + fn)
+
+print("Precision:", precision)
+print("Precision (%):", precision * 100)
+
+print("Recall:", recall)
+print("Recall (%):", recall * 100)
+
+
+CALCULATION:
+
+Precision:
+
+= TP / (TP + FP)
+
+= 60 / (60 + 10)
+
+= 60 / 70
+
+= 0.8571
+
+Precision = 85.71%
+
+
+Recall:
+
+= TP / (TP + FN)
+
+= 60 / (60 + 30)
+
+= 60 / 90
+
+= 0.6667
+
+Recall = 66.67%
+
+
+FINAL ANSWERS:
+
+Precision = 85.71%
+Recall = 66.67%
+
+
+TASK 4
+
+Given a food delivery fraud detection system:
+
+TP = 40
+TN = 150
+FP = 20
+FN = 10
+
+Calculate the F1 Score.
+
+CODE:
+
+tp = 40
+tn = 150
+fp = 20
+fn = 10
+
+# Calculate precision
+precision = tp / (tp + fp)
+
+# Calculate recall
+recall = tp / (tp + fn)
+
+# Calculate F1 score
+f1 = 2 * (precision * recall) / (precision + recall)
+
+print("Precision:", precision)
+print("Recall:", recall)
+print("F1 Score:", f1)
+print("F1 Score (%):", f1 * 100)
+
+
+CALCULATION:
+
+Precision:
+
+= 40 / (40 + 20)
+= 40 / 60
+= 0.6667
+
+
+Recall:
+
+= 40 / (40 + 10)
+= 40 / 50
+= 0.8
+
+
+F1 Score:
+
+= 2 * (0.6667 * 0.8) / (0.6667 + 0.8)
+
+= 0.7273
+
+F1 Score = 72.73%
+
+
+EXPLANATION:
+
+The F1 score combines precision and recall into a single value, so a higher F1 score indicates a better balance between correctly detecting fraud and avoiding false fraud alerts.
+
+
+FINAL ANSWERS:
+
+Task 1:
+Accuracy = 85%
+Precision = 83.33%
+Recall = 71.43%
+F1 Score = 76.92%
+
+Task 3:
+Precision = 85.71%
+Recall = 66.67%
+
+Task 4:
+F1 Score = 72.73%
