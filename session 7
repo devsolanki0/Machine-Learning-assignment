@@ -1,0 +1,235 @@
+REGRESSION MODEL EVALUATION – MSE, RMSE, MAE AND R²
+
+
+TASK 1
+
+Given two arrays containing actual delivery times and predicted delivery times for 10 Zomato orders, calculate the Mean Squared Error (MSE) and Root Mean Squared Error (RMSE).
+
+CODE:
+
+import numpy as np
+from sklearn.metrics import mean_squared_error
+
+# Actual delivery times in minutes
+actual = np.array([30, 35, 40, 45, 50, 55, 60, 65, 70, 75])
+
+# Predicted delivery times
+predicted = np.array([32, 33, 42, 43, 48, 57, 62, 63, 72, 73])
+
+# Calculate MSE
+mse = mean_squared_error(actual, predicted)
+
+# Calculate RMSE
+rmse = np.sqrt(mse)
+
+print("MSE:", mse)
+print("RMSE:", rmse)
+
+
+EXPLANATION:
+
+MSE calculates the average squared difference between actual and predicted values, while RMSE is the square root of MSE and represents the average prediction error in the same unit as delivery time (minutes).
+
+
+TASK 2
+
+For a Flipkart product price prediction task, create a function to calculate MAE and R² score.
+
+CODE:
+
+from sklearn.metrics import mean_absolute_error, r2_score
+
+# Actual prices
+actual_prices = [1000, 1500, 2000, 2500, 3000, 3500]
+
+# Predicted prices
+predicted_prices = [1100, 1450, 2100, 2400, 2900, 3600]
+
+
+def calculate_metrics(actual, predicted):
+    mae = mean_absolute_error(actual, predicted)
+    r2 = r2_score(actual, predicted)
+
+    return mae, r2
+
+
+mae, r2 = calculate_metrics(actual_prices, predicted_prices)
+
+print("MAE:", mae)
+print("R² Score:", r2)
+
+
+EXPLANATION:
+
+MAE shows the average absolute prediction error, while R² shows how well the model explains the variation in the actual product prices. A lower MAE and higher R² generally indicate better performance.
+
+
+TASK 3
+
+Create a residual plot for actual vs predicted movie ratings for 20 movies.
+
+CODE:
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Actual movie ratings
+actual_ratings = np.array([
+    4.5, 3.8, 4.2, 2.5, 3.9,
+    4.7, 3.2, 4.0, 2.8, 3.5,
+    4.8, 3.7, 4.1, 2.9, 3.6,
+    4.4, 3.0, 4.6, 3.3, 4.9
+])
+
+# Predicted movie ratings
+predicted_ratings = np.array([
+    4.3, 3.9, 4.0, 2.8, 3.7,
+    4.6, 3.4, 3.8, 3.0, 3.6,
+    4.7, 3.5, 4.2, 3.1, 3.4,
+    4.5, 3.2, 4.4, 3.5, 4.7
+])
+
+# Calculate residuals
+residuals = actual_ratings - predicted_ratings
+
+# Create residual plot
+plt.scatter(predicted_ratings, residuals)
+
+plt.axhline(y=0, linestyle="--")
+plt.xlabel("Predicted Movie Rating")
+plt.ylabel("Residual (Actual - Predicted)")
+plt.title("Residual Plot for Movie Ratings")
+plt.show()
+
+
+EXPLANATION:
+
+A residual plot shows the difference between actual and predicted values. If the residuals are randomly scattered around zero, the model is generally performing well; large patterns or increasing spread may indicate that the model has errors or is not capturing some important relationship.
+
+
+TASK 4
+
+Two models are predicting delivery time for Swiggy orders:
+
+Model A:
+RMSE = 8 minutes
+R² = 0.65
+
+Model B:
+RMSE = 6 minutes
+R² = 0.55
+
+
+ANSWER:
+
+I would choose MODEL A if the main goal is to explain the overall variation in delivery time, because it has a higher R² score of 0.65.
+
+However, if the main goal is to minimize the actual prediction error in minutes, I would choose MODEL B because it has a lower RMSE of 6 minutes.
+
+Since delivery-time prediction is usually concerned with making accurate time estimates, MODEL B may be preferable because its predictions are typically closer to the actual delivery times.
+
+Therefore, for practical delivery-time prediction, I would choose MODEL B because the lower RMSE means a smaller prediction error, even though its R² is slightly lower.
+
+
+TASK 5
+
+Compare two regression models for predicting Spotify song popularity using MSE, RMSE, MAE, and R². Then identify which model is likely overfitting.
+
+CODE:
+
+import numpy as np
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+# Actual popularity values
+y_train = np.array([70, 75, 80, 85, 90, 65, 72, 78, 88, 92])
+y_test = np.array([68, 74, 82, 86, 91, 66, 71, 79, 87, 89])
+
+# Model A predictions
+model_A_train = np.array([71, 74, 79, 84, 89, 66, 73, 77, 87, 91])
+model_A_test = np.array([69, 73, 81, 85, 90, 67, 72, 78, 88, 90])
+
+# Model B predictions
+model_B_train = np.array([70, 75, 80, 85, 90, 65, 72, 78, 88, 92])
+model_B_test = np.array([55, 90, 70, 95, 75, 80, 60, 88, 72, 98])
+
+
+# Function to calculate all metrics
+def evaluate_model(actual, predicted):
+    mse = mean_squared_error(actual, predicted)
+    rmse = np.sqrt(mse)
+    mae = mean_absolute_error(actual, predicted)
+    r2 = r2_score(actual, predicted)
+
+    return mse, rmse, mae, r2
+
+
+# Evaluate Model A on training data
+mse_A_train, rmse_A_train, mae_A_train, r2_A_train = evaluate_model(
+    y_train, model_A_train
+)
+
+# Evaluate Model A on testing data
+mse_A_test, rmse_A_test, mae_A_test, r2_A_test = evaluate_model(
+    y_test, model_A_test
+)
+
+
+# Evaluate Model B on training data
+mse_B_train, rmse_B_train, mae_B_train, r2_B_train = evaluate_model(
+    y_train, model_B_train
+)
+
+# Evaluate Model B on testing data
+mse_B_test, rmse_B_test, mae_B_test, r2_B_test = evaluate_model(
+    y_test, model_B_test
+)
+
+
+# Print results
+print("MODEL A")
+print("Training MSE:", mse_A_train)
+print("Training RMSE:", rmse_A_train)
+print("Training MAE:", mae_A_train)
+print("Training R²:", r2_A_train)
+
+print("\nTesting MSE:", mse_A_test)
+print("Testing RMSE:", rmse_A_test)
+print("Testing MAE:", mae_A_test)
+print("Testing R²:", r2_A_test)
+
+
+print("\nMODEL B")
+print("Training MSE:", mse_B_train)
+print("Training RMSE:", rmse_B_train)
+print("Training MAE:", mae_B_train)
+print("Training R²:", r2_B_train)
+
+print("\nTesting MSE:", mse_B_test)
+print("Testing RMSE:", rmse_B_test)
+print("Testing MAE:", mae_B_test)
+print("Testing R²:", r2_B_test)
+
+
+ANSWER:
+
+MODEL B is likely overfitting because its training predictions are almost exactly equal to the actual values, giving extremely low training error and a very high training R² score. However, its test predictions have much larger errors and a lower R² score, showing that the model does not generalize well to unseen data.
+
+MODEL A has more consistent performance between its training and testing results, so it is likely to generalize better.
+
+
+IMPORTANT METRIC INTERPRETATION:
+
+MSE:
+Lower is better. It heavily penalizes large errors.
+
+RMSE:
+Lower is better. It represents prediction error in the original unit.
+
+MAE:
+Lower is better. It represents the average absolute prediction error.
+
+R²:
+Higher is generally better. A value closer to 1 means the model explains more of the variation in the target.
+
+OVERFITTING:
+Very good training performance + much worse testing performance usually indicates overfitting.
